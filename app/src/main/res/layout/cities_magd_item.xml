@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp">
+    
+    <TextView 
+        android:id="@+id/city_tex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="12dp"/>
+    
+    <Button 
+        android:id="@+id/delete_but"
+        android:layout_width="50dp"
+        android:layout_height="30dp"
+        android:text="删除"
+        android:textSize="12dp"
+        android:background="#8B8B7A"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dp"/>
+	
+	<View 
+		android:layout_width="0px"
+		android:layout_height="0px"
+		android:layout_below="@id/city_tex"/>
+	
+</RelativeLayout>
