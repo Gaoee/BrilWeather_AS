@@ -20,7 +20,7 @@ import android.widget.TextView;
 public class SideBar extends View {
 	// 触摸事件
 	private OnTouchingLetterChangedListener onTouchingLetterChangedListener;
-	// 26个字�?
+	// 26个字母
 	public static String[] b = { "*","A", "B", "C", "D", "E", "F", "G", "H", "I",
 			"J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
 			"W", "X", "Y", "Z","#"};
@@ -59,12 +59,12 @@ public class SideBar extends View {
 			paint.setTypeface(Typeface.DEFAULT_BOLD);
 			paint.setAntiAlias(true);
 			paint.setTextSize(20);
-			// 选中的状�?
+			// 选中的状态
 			if (i == choose) {
 				paint.setColor(getResources().getColor(R.color.yellow));
 				paint.setFakeBoldText(true);
 			}
-			// x坐标等于中间-字符串宽度的�?�?.
+			// x坐标等于中间-字符串宽度的一半.
 			float xPos = width / 2 - paint.measureText(b[i]) / 2;
 			float yPos = singleHeight * i + singleHeight;
 			canvas.drawText(b[i], xPos, yPos, paint);
@@ -117,7 +117,7 @@ public class SideBar extends View {
 	}
 
 	/**
-	 * 向外公开的方�?
+	 * 向外公开的方法
 	 * 
 	 * @param onTouchingLetterChangedListener
 	 */

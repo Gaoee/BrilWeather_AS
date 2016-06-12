@@ -2,7 +2,7 @@
 package com.brilweather.sortlist;
 
 /**
- * @Description:Java汉字转换为拼�?
+ * @Description:Java汉字转换为拼音
  * @author http://blog.csdn.net/finddreams
  */ 
 public class CharacterParser {

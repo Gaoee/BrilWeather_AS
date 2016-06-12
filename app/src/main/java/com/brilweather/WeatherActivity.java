@@ -1,39 +1,11 @@
 package com.brilweather;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.brilweather.DB.WeatherDB;
-import com.brilweather.http.HttpCallbackListene;
-import com.brilweather.http.HttpUtil;
-import com.brilweather.model.City;
-import com.brilweather.model.Weather;
-import com.brilweather.weathershow.HorizontalScrollViewEx;
-import com.brilweather.weathershow.MyUtils;
-import com.brilweather.weathershow.ScrollViewCallbackListene;
-import com.example.brilweather.R;
-
-import android.R.integer;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.provider.ContactsContract.Contacts.Data;
-import android.text.format.DateFormat;
-import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -45,6 +17,26 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.brilweather.DB.WeatherDB;
+import com.brilweather.http.HttpCallbackListene;
+import com.brilweather.http.HttpUtil;
+import com.brilweather.model.City;
+import com.brilweather.model.Weather;
+import com.brilweather.weathershow.HorizontalScrollViewEx;
+import com.brilweather.weathershow.MyUtils;
+import com.brilweather.weathershow.ScrollViewCallbackListene;
+import com.example.brilweather.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 
 
 public class WeatherActivity extends Activity implements OnClickListener{
@@ -95,11 +87,18 @@ public class WeatherActivity extends Activity implements OnClickListener{
     }
 
     private void initView() {
+		Log.v(TAG, "initView()");
         LayoutInflater inflater = getLayoutInflater();
         final int screenWidth = MyUtils.getScreenMetrics(this).widthPixels;
         final int screenHeight = MyUtils.getScreenMetrics(this).heightPixels;
 
         weathers = weatherDB.loadWeathers();
+		if (weathers.size() == 0){
+			Intent intent = new Intent(WeatherActivity.this,CityshowAcivity.class);
+			startActivity(intent);
+			return;
+		}
+		Log.v(TAG, "weahters:" + weathers.size());
         cityNameTextView.setText(weathers.get(0).getCityName());
         layoutList.clear();
         for (int i = 0; i < weathers.size(); i++) {
@@ -152,10 +151,12 @@ public class WeatherActivity extends Activity implements OnClickListener{
     }
     
     private void updateView(int cityId, ViewGroup layout) {
+		Log.i(TAG, "updateView!");
 		ViewGroup layoutGroup = layoutList.get(cityId);
 		Log.v(TAG, "updateView cityID:" + cityId);
 		Weather weather = weathers.get(cityId);
-		
+
+
 		TextView publishTextView = (TextView)layoutGroup.findViewById(R.id.publish_text);
 		TextView currentTextView = (TextView)layoutGroup.findViewById(R.id.current_date);
 		TextView despTextView = (TextView)layoutGroup.findViewById(R.id.weather_desp);
@@ -163,8 +164,17 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		TextView maxTempTextView = (TextView)layoutGroup.findViewById(R.id.max_temp);
 		ListView listView = (ListView)layoutGroup.findViewById(R.id.list);
 		
-		Log.i(TAG, weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
+		Log.i(TAG,"updateView" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
 				+ weather.getDesp() + weather.getTime());
+
+		//初始时，通过http加载最新数据
+		// 形成了一个递归，需要修改，
+		if (weather.getTime() == null)
+		{
+			Log.v(TAG, "初始时，通过http加载最新数据");
+			String currentCityCode = weather.getCityCode();
+			updateWeather(currentCityCode);
+		}
 		
 		if (weather.getTime() != null) {
 			publishTextView.setText(weather.getTime().substring(10));
@@ -173,7 +183,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		despTextView.setText(weather.getDesp());
 		minTempTextView.setText(weather.getMinTemp());
 		maxTempTextView.setText(weather.getMaxTemp());
-		
+		Log.i(TAG, "updateView finish!");
     }
     
     private void updateWeather(String cityCode) {
@@ -204,7 +214,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 				weather.setTime(w.getTime());
 				weatherDB.updataWeather(weather.getCityCode(), weather.getMinTemp(), 
 						weather.getMaxTemp(), weather.getDesp(), weather.getTime());
-				Log.i(TAG, weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
+				Log.i(TAG, "getOnHttpWeather:" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
 						+ weather.getDesp() + weather.getTime());
 				Log.v(TAG, "cityID:" + cityId);
 				runOnUiThread(new Runnable() {
@@ -301,11 +311,11 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		try {
 			JSONObject jsonObject = new JSONObject(weatherString);
 			JSONObject jsonWeather = jsonObject.getJSONObject("weatherinfo");
-			weather.setMinTemp(jsonWeather.getString("temp1"));
-			weather.setMaxTemp(jsonWeather.getString("temp2"));
+			weather.setMinTemp(jsonWeather.getString("temp2"));
+			weather.setMaxTemp(jsonWeather.getString("temp1"));
 			weather.setDesp(jsonWeather.getString("weather"));
 			weather.setTime(sdf.format(new Date()) + jsonWeather.getString("ptime"));
-			Log.i(TAG, weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
+			Log.i(TAG,"handleWeatherResponse" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
 					+ weather.getDesp() + weather.getTime());
 			
 		} catch (JSONException e) {
@@ -336,22 +346,5 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		}
 	}
 	
-	@Override
-	public boolean onMenuOpened(int featureId, Menu menu) {
-		return super.onMenuOpened(featureId, menu);
-	}
-	
-	class UpdateWeatherAsy extends AsyncTask<Integer, Integer, Integer>{
 
-		@Override
-		protected void onPostExecute(Integer pageId) {
-			Log.v(TAG, "updateWeather");
-			updateView(pageId, layoutList.get(pageId));
-		}
-
-		@Override
-		protected Integer doInBackground(Integer... params) {
-			return params[0];
-		}
-	}
 }

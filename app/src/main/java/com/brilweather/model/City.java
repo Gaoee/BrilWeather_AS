@@ -20,8 +20,7 @@ public class City {
 	public String getCityName() {
 		return this.city_name;
 	}
-	
-	
+
 	public void setCityCode(String code){
 		this.city_code = code;
 	}

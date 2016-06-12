@@ -2,7 +2,7 @@ package com.brilweather.sortlist;
 
 public class SortModel {
 
-	private String name;   //显示的数�??
+	private String name;   //显示的城市名
 	private String sortLetters;  //显示数据拼音的首字母
 	private String code;	//显示城市码
 	

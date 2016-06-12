@@ -60,10 +60,10 @@ public class SortAdapter extends BaseAdapter implements SectionIndexer{
 			viewHolder = (ViewHolder) view.getTag();
 		}
 		
-		//根据position获取分类的首字母的Char ascii�?
+		//根据position获取分类的首字母的Char ascii值
 		int section = getSectionForPosition(position);
 		
-		//如果当前位置等于该分类首字母的Char的位�? ，则认为是第�?次出�?
+		//如果当前位置等于该分类首字母的Char的位置，则认为是第1次出现
 		if(position == getPositionForSection(section)){
 			viewHolder.tvLetter.setVisibility(View.VISIBLE);
 			viewHolder.tvLetter.setText(mContent.getSortLetters());
@@ -89,7 +89,7 @@ public class SortAdapter extends BaseAdapter implements SectionIndexer{
 
 
 	/**
-	 * 根据ListView的当前位置获取分类的首字母的Char ascii�?
+	 * 根据ListView的当前位置获取分类的首字母的Char ascii值
 	 */
 	public int getSectionForPosition(int position) {
 		return list.get(position).getSortLetters().charAt(0);
@@ -111,7 +111,7 @@ public class SortAdapter extends BaseAdapter implements SectionIndexer{
 	}
 	
 	/**
-	 * 提取英文的首字母，非英文字母�?#代替�?
+	 * 提取英文的首字母，非英文字母用#代替
 	 * 
 	 * @param str
 	 * @return

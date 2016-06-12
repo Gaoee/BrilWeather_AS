@@ -85,9 +85,9 @@ public class AutoUpdateService extends Service {
 					weather.setTime(w.getTime());
 					weatherDB.updataWeather(weather.getCityCode(), weather.getMinTemp(), 
 							weather.getMaxTemp(), weather.getDesp(), weather.getTime());
-					Log.i(TAG, weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
+					Log.i(TAG,"AutoUpdateService" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
 							+ weather.getDesp() + weather.getTime());
-					Log.v(TAG, "cityID:" + cityId);
+					Log.v(TAG, "AutoUpdateService cityID:" + cityId);
 					
 				}
 				
@@ -108,11 +108,11 @@ public class AutoUpdateService extends Service {
 			try {
 				JSONObject jsonObject = new JSONObject(weatherString);
 				JSONObject jsonWeather = jsonObject.getJSONObject("weatherinfo");
-				weather.setMinTemp(jsonWeather.getString("temp1"));
-				weather.setMaxTemp(jsonWeather.getString("temp2"));
+				weather.setMinTemp(jsonWeather.getString("temp2"));
+				weather.setMaxTemp(jsonWeather.getString("temp1"));
 				weather.setDesp(jsonWeather.getString("weather"));
 				weather.setTime(sdf.format(new Date()) + jsonWeather.getString("ptime"));
-				Log.i(TAG, weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
+				Log.i(TAG,"AutoUpdateService" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
 						+ weather.getDesp() + weather.getTime());
 				
 			} catch (JSONException e) {

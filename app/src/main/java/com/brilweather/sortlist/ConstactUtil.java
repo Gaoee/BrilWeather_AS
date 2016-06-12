@@ -9,7 +9,7 @@ import android.provider.ContactsContract;
 
 public class ConstactUtil {
 	/**
-	 * 获取�?有数�?
+	 * 获取 有数
 	 * 
 	 * @return
 	 */
@@ -24,10 +24,10 @@ public class ConstactUtil {
 						+ " COLLATE LOCALIZED ASC");
 		if (c.moveToFirst()) {
 			do {
-				// 获得联系人的ID�?
+				// 获得联系人的ID
 				String contactId = c.getString(c
 						.getColumnIndex(ContactsContract.Contacts._ID));
-				// 获得联系人姓�?
+				// 获得联系人姓名
 				String name = c
 						.getString(c
 								.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));

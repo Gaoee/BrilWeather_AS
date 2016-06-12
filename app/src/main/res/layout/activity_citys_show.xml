@@ -4,24 +4,11 @@
     android:layout_height="match_parent" 
     android:focusableInTouchMode="true">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical" >
+         >
 
-        <com.brilweather.sortlist.ClearEditText
-            android:id="@+id/filter_edit"
-            android:layout_width="fill_parent"
-            android:layout_height="40dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="5dip"
-            android:gravity="center"
-            android:background="@drawable/acm_inputbox"
-            android:drawableLeft="@drawable/search"
-            android:hint="@string/search"
-            android:singleLine="true"
-            android:textSize="15.0dip" />
 
         <FrameLayout
             android:layout_width="fill_parent"
@@ -50,9 +37,25 @@
                 android:id="@+id/sidrbar"
                 android:layout_width="30.0dip"
                 android:layout_height="fill_parent"
-                android:layout_gravity="right|center" />
+                android:layout_gravity="right|center"
+                android:visibility="gone"/>
         </FrameLayout>
-    </LinearLayout>
+
+        <com.brilweather.sortlist.ClearEditText
+            android:id="@+id/filter_edit"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dip"
+            android:gravity="center"
+            android:background="@drawable/acm_inputbox"
+            android:drawableLeft="@drawable/search"
+            android:hint="@string/search"
+            android:singleLine="true"
+            android:textSize="15.0dip" />
+
+    </FrameLayout>
 
     
 </RelativeLayout>

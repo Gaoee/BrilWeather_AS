@@ -81,19 +81,19 @@ public class BitmapUtil {
 	}
 
 	public static Bitmap drawableToBitmap(Drawable drawable) {
-		// �? drawable 的长�?
+		//
 		int w = drawable.getIntrinsicWidth();
 		int h = drawable.getIntrinsicHeight();
 
-		// �? drawable 的颜色格�?
+		//
 		Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
 				: Bitmap.Config.RGB_565;
 		// 建立对应 bitmap
 		Bitmap bitmap = Bitmap.createBitmap(w, h, config);
-		// 建立对应 bitmap 的画�?
+		// 建立对应 bitmap 的画
 		Canvas canvas = new Canvas(bitmap);
 		drawable.setBounds(0, 0, w, h);
-		// �? drawable 内容画到画布�?
+		// drawable 内容画到画布
 		drawable.draw(canvas);
 		return bitmap;
 	}
@@ -142,7 +142,7 @@ public class BitmapUtil {
 	}
 
 	/**
-	 * @return 返回指定笔离文字顶部的基准距�?
+	 * @return 返回指定笔离文字顶部的基准距�?
 	 */
 	public static float getFontLeading(Paint paint) {
 		FontMetrics fm = paint.getFontMetrics();

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.brilweather.model.City;
+import com.brilweather.model.Province;
 import com.brilweather.model.Weather;
 
 import android.R.id;
@@ -62,12 +63,32 @@ public class WeatherDB {
 		return weatherDB;
 	}
 
+	public List<Province> loadProvinces(){
+		List<Province> provinceList = new ArrayList<>();
+		Cursor cursor = db.query(DBHelper.PROVINCE_TABLE_NAME, null, null, null, null, null, null);
+
+		if (cursor.moveToFirst()){
+			do {
+				Province province = new Province();
+				province.setId(cursor.getInt(cursor.getColumnIndex("_id")));
+				province.setProName(cursor.getString(cursor.getColumnIndex("name")));
+				provinceList.add(province);
+			}while(cursor.moveToNext());
+		}
+
+		if (cursor != null){
+			cursor.close();
+		}
+		return provinceList;
+	}
+
 	/*
 	 * 查询所有的城市
 	 * */
-	public List<City> loadCitys() {
+	public List<City> loadCitys(int province_id) {
 		List<City> cityList = new ArrayList<City>();
-		Cursor cursor = db.query(DBHelper.CITY_TABLE_NAME, null, null, null, null, null, null);
+		Cursor cursor = db.query(DBHelper.CITY_TABLE_NAME, null,  "province_id = ?",
+				new String[]{Integer.toString(province_id - 1)}, null, null, null);
 		
 		if (cursor.moveToFirst()) {
 			do {

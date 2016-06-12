@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import junit.runner.Version;
-
-import android.R.anim;
 import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,23 +13,24 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper {
-	private static String TAG = "LEE";
+	private static String TAG = "LEE DB";
 	
 	public static final String DB_PATH = "/data/data/com.example.brilweather/databases/";  
 	public static final String DB_NAME = "db_weather.db";
 	public static final String PROVINCE_TABLE_NAME = "provinces";
 	public static final String WEATHER_TABLE_NAME = "weather";
 	public static final String CITY_TABLE_NAME = "citys";
-	
-	private static final String CREATE_Weather= "create table if not exists " + WEATHER_TABLE_NAME 
+
+	private static final String CREATE_WEATHER = "create table if not exists " + WEATHER_TABLE_NAME
 			+ "(id integer primary key autoincrement," 
 			+ "cityName text," 
-			+ "cityCode text,"
+			+ "cityCode text not null unique,"
 			+ "temp1 text,"
 			+ "temp2 text,"
 			+ "weatherDesp text,"
 			+ "publishTime text)";
-	
+
+
 	private final Context mContext;
 	
 	public DBHelper(Context context, int version) {
@@ -43,17 +41,17 @@ public class DBHelper extends SQLiteOpenHelper {
 	
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(CREATE_Weather);
+		db.execSQL(CREATE_WEATHER);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		Log.v(TAG, "oldVersion:" + oldVersion);
 		switch (oldVersion) {
-		case 1:
-			db.execSQL(CREATE_Weather);
-
-		default:
-			break;
+			case 1:
+				db.execSQL(CREATE_WEATHER);
+			default:
+				break;
 		}
 	}
 	
@@ -73,15 +71,15 @@ public class DBHelper extends SQLiteOpenHelper {
 		Log.v(TAG, "create weather.db!" + version);
 		SQLiteDatabase db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null, SQLiteDatabase.OPEN_READWRITE);
 		switch (version) {
-		case 2:
-			try {
-				db.execSQL(CREATE_Weather);
-			} catch (SQLException e) {
-				Log.v(TAG, e.toString());
-			}
-			Log.v(TAG, "create weather tabble!");
-		default:
-			break;
+			case 2:
+				try {
+					db.execSQL(CREATE_WEATHER);
+				} catch (SQLException e) {
+					Log.v(TAG, e.toString());
+				}
+			Log.v(TAG, "create weather table!");
+			default:
+				break;
 		}
 		
 		db.close();

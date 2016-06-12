@@ -280,4 +280,13 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 		
 		return animator;
 	}
+
+	@Override
+	public void onBackPressed() {
+		if(relaLayout2.getVisibility() != View.GONE){
+			//终止事务
+			weatherDB.cancelTransaction();
+		}
+		super.onBackPressed();
+	}
 }

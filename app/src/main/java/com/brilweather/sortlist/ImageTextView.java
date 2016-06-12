@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.TextView;
 /**
- * @Description: 文字图片，这个相信大家都知道，比如QQ底部导航上的未读消息�?
+ * @Description: 文字图片，这个相信大家都知道，比如QQ底部导航上的未读消息
  * 
  * @author http://blog.csdn.net/finddreams
  */ 
