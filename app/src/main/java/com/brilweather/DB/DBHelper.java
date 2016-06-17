@@ -35,32 +35,54 @@ public class DBHelper extends SQLiteOpenHelper {
 	
 	public DBHelper(Context context, int version) {
 		super(context, DB_NAME, null, version);
+		Log.v(TAG, "DBHelper version:" + version);
 		mContext = context;
 	}
 
-	
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(CREATE_WEATHER);
+
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		Log.v(TAG, "oldVersion:" + oldVersion);
+
+	}
+
+	//只在新建数据库的时候的时候调用
+	public void onMyCreate(SQLiteDatabase db) {
+		Log.v(TAG, "onCreate");
+		try {
+			db.execSQL(CREATE_WEATHER);
+			Log.v(TAG, "create weather table!");
+		} catch (SQLException e) {
+			Log.v(TAG, e.toString());
+		}
+	}
+
+	//在version发生变化的时候调用
+	public void onMyUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		Log.v(TAG, "onUpgrade oldVersion:" + oldVersion);
 		switch (oldVersion) {
 			case 1:
-				db.execSQL(CREATE_WEATHER);
+
 			default:
 				break;
 		}
 	}
-	
-	public void createDataBase(int version) throws IOException{
+
+	/**
+	 * 新建数据库，并进行版本控制
+	 * @param newVersion
+	 * @throws IOException
+     */
+	public void createDataBase(int newVersion) throws IOException{
 		boolean dbExist = checkDataBase();
 		
 		if(dbExist){
 			
 		}else {
+			//一定要在这里进行getReadableDatabase,不然copyDataBase会出错的
 			this.getReadableDatabase();
 			try {
 				copyDataBase();
@@ -68,24 +90,42 @@ public class DBHelper extends SQLiteOpenHelper {
 				throw new Error("Error copying!");
 			}
 		}
-		Log.v(TAG, "create weather.db!" + version);
 		SQLiteDatabase db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null, SQLiteDatabase.OPEN_READWRITE);
-		switch (version) {
-			case 2:
-				try {
-					db.execSQL(CREATE_WEATHER);
-				} catch (SQLException e) {
-					Log.v(TAG, e.toString());
+
+		//仿照了SQLiteOpenHelper中的数据库版本控制方法
+		final int version = db.getVersion();
+		Log.v(TAG, "createDataBase version: " + version);
+		if (version != newVersion) {
+			if (db.isReadOnly()) {
+				throw new SQLiteException("Can't upgrade read-only database from version " +
+						db.getVersion() + " to " + newVersion );
+			}
+			db.beginTransaction();
+			try {
+				if (version == 0) {
+					onMyCreate(db);
+				} else {
+					if (version > newVersion) {
+						onDowngrade(db, version, newVersion);
+					} else {
+						onMyUpgrade(db, version, newVersion);
+					}
 				}
-			Log.v(TAG, "create weather table!");
-			default:
-				break;
+				db.setVersion(newVersion);
+				db.setTransactionSuccessful();
+			} finally {
+				db.endTransaction();
+			}
 		}
-		
 		db.close();
 	}
-	
+
+	/**
+	 * 检测程序数据库是否已经存在
+	 * @return
+     */
 	private boolean checkDataBase() {
+		Log.v(TAG, "checkDataBase");
 		SQLiteDatabase checkDB = null;
 		try {
 			String myPath = DB_PATH +DB_NAME;
@@ -100,8 +140,14 @@ public class DBHelper extends SQLiteOpenHelper {
 		
 		return checkDB != null ? true : false;
 	}
-	
+
+
+	/**
+	 * 将Assets中的数据拷入程序文件夹中
+	 * @throws IOException
+     */
 	private void copyDataBase() throws IOException{
+		Log.v(TAG, "copyDataBase");
 		InputStream myInput = mContext.getAssets().open(DB_NAME);
 		String outFileNameString = DB_PATH +DB_NAME;
 		OutputStream myOutput = new FileOutputStream(outFileNameString);
@@ -116,4 +162,5 @@ public class DBHelper extends SQLiteOpenHelper {
 		myInput.close();
 		
 	}
+
 }

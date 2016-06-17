@@ -25,13 +25,13 @@
             android:textSize="24sp" />
 
         <Button
-            android:id="@+id/refresh_weather"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:id="@+id/weather_menu"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
-            android:background="@drawable/refresh" />
+            android:background="@drawable/icon_menu_square" />
         
         
         <View 
@@ -41,10 +41,20 @@
             android:layout_alignParentBottom="true"/>
         
     </RelativeLayout>
-    <com.brilweather.weathershow.HorizontalScrollViewEx
-        android:id="@+id/container"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent" >
-	</com.brilweather.weathershow.HorizontalScrollViewEx>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swiperefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.brilweather.weathershow.HorizontalScrollViewEx
+            android:id="@+id/container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" >
+        </com.brilweather.weathershow.HorizontalScrollViewEx>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+
 	
 </LinearLayout>

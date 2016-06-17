@@ -14,7 +14,7 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.Light" >
+        android:theme="@style/AppTheme" >
         
         <activity
             android:name="com.brilweather.WeatherActivity"
@@ -48,7 +48,7 @@
         <service android:name="com.brilweather.AutoUpdateService"></service>
         
         <receiver android:name="com.brilweather.AutoUpdateReceiver"></receiver>
-        
+
     </application>
 
 </manifest>

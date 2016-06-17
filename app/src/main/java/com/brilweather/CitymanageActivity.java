@@ -1,18 +1,7 @@
 package com.brilweather;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import com.brilweather.DB.WeatherDB;
-import com.brilweather.citymanage.DeleteAdapter;
-import com.brilweather.model.City;
-import com.example.brilweather.R;
-
-import android.R.integer;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
@@ -29,6 +18,15 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+
+import com.brilweather.DB.WeatherDB;
+import com.brilweather.citymanage.DeleteAdapter;
+import com.brilweather.model.City;
+import com.example.brilweather.R;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class CitymanageActivity extends Activity implements OnClickListener{
 	private static final String TAG = "LEE";
@@ -175,6 +173,10 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 			
 		case R.id.add_but:
 			Intent intent = new Intent(CitymanageActivity.this, CityshowAcivity.class);
+			//假如没有城市数据时将intent的Action设置为“NoSelect”
+			if (getCities().size() == 0){
+				intent.setAction(CityshowAcivity.INTENT_ACTION_NOCITY);
+			}
 			startActivity(intent);
 			finish();
 			break;

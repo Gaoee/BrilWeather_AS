@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -29,6 +30,7 @@ import android.widget.Toast;
 import com.brilweather.DB.WeatherDB;
 import com.brilweather.model.City;
 import com.brilweather.model.Province;
+import com.brilweather.model.Weather;
 import com.brilweather.sortlist.CharacterParser;
 import com.brilweather.sortlist.ClearEditText;
 import com.brilweather.sortlist.PinyinComparator;
@@ -45,6 +47,8 @@ import java.util.Map;
 
 public class CityshowAcivity extends Activity {
 	private static  final String TAG = "CityshowActivity";
+
+	public static final String INTENT_ACTION_NOCITY = "NoCity";
 
 	private static final int PROVINCE_LEVEL = 1;
 	private static final int CITY_LEVEL = 2;
@@ -139,12 +143,19 @@ public class CityshowAcivity extends Activity {
 				if(ChoiceLevel == PROVINCE_LEVEL){
 					//根据选择的省，加载相应的城市
 					SortModel province = (SortModel) adapter.getItem(position - 1);
+					ChoiceLevel = CITY_LEVEL;		//一定要在ConstentAsyncTask().execute之前，因为里面用的了ChoiceLevel
 					new ConstentAsyncTask().execute(Integer.valueOf(province.getCode()));
-					ChoiceLevel = CITY_LEVEL;
 				}else if(ChoiceLevel == CITY_LEVEL) {
+
 					SortModel city = (SortModel) adapter.getItem(position - 1);
 					if (weatherDB.addSecletCity(city.getName(), city.getCode()) != -1) {
 						Toast.makeText(CityshowAcivity.this, "添加成功！", Toast.LENGTH_SHORT).show();
+						Intent i = getIntent();
+						Log.v(TAG," i.getAction():" + i.getAction());
+						if (i.getAction() == INTENT_ACTION_NOCITY){
+							Intent intent = new Intent(CityshowAcivity.this, WeatherActivity.class);
+							startActivity(intent);
+						}
 						finish();
 					} else {
 						Toast.makeText(CityshowAcivity.this, "添加失败！", Toast.LENGTH_SHORT).show();

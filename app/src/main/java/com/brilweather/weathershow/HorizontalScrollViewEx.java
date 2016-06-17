@@ -1,6 +1,7 @@
 package com.brilweather.weathershow;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -17,7 +18,7 @@ public class HorizontalScrollViewEx extends ViewGroup {
     private int mChildIndex = 0;
     private int mLastChildIndex = 0;
 
-    // 分别记录上次滑动的坐
+    // 分别记录上次滑动的坐标
     private int mLastX = 0;
     private int mLastY = 0;
     // 分别记录上次滑动的坐(onInterceptTouchEvent)
@@ -172,7 +173,7 @@ public class HorizontalScrollViewEx extends ViewGroup {
         } else if (heightSpecMode == MeasureSpec.AT_MOST) {
             final View childView = getChildAt(0);
             measuredHeight = childView.getMeasuredHeight();
-            setMeasuredDimension(widthSpaceSize, childView.getMeasuredHeight());
+            setMeasuredDimension(widthSpaceSize, measuredHeight);
         } else if (widthSpecMode == MeasureSpec.AT_MOST) {
             final View childView = getChildAt(0);
             measuredWidth = childView.getMeasuredWidth() * childCount;
@@ -198,14 +199,23 @@ public class HorizontalScrollViewEx extends ViewGroup {
         }
     }
 
-    
     /**
      * 滚动到指定页面
      * @param pageIndex from 0 to n
      */
-    public void ScrollTo(int pageIndex) {
-    	int dx = pageIndex * mChildWidth;
-    	scrollTo(dx, 0);
+    public void scrollToSelectedPage(int pageIndex) {
+
+        if(pageIndex <= 0 || pageIndex >= getChildCount()){
+            return;
+        }
+
+    	final int dx = pageIndex * mChildWidth;
+    	post(new Runnable() {
+            @Override
+            public void run() {
+                scrollTo(dx, 0);
+            }
+        });
 	}
     
     private void smoothScrollBy(int dx, int dy) {

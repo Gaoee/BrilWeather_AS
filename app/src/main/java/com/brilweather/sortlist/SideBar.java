@@ -1,7 +1,5 @@
 package com.brilweather.sortlist;
 
-import com.example.brilweather.R;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -12,6 +10,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
+
+import com.example.brilweather.R;
 /**
  * @Description:右侧的sideBar,显示的是二十六个字母以及*，和#号，
  * 点击字母，自动导航到相应拼音的汉字上
@@ -66,6 +66,7 @@ public class SideBar extends View {
 			}
 			// x坐标等于中间-字符串宽度的一半.
 			float xPos = width / 2 - paint.measureText(b[i]) / 2;
+
 			float yPos = singleHeight * i + singleHeight;
 			canvas.drawText(b[i], xPos, yPos, paint);
 			paint.reset();// 重置画笔

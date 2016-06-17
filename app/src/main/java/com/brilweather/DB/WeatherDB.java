@@ -20,7 +20,7 @@ import android.util.Log;
 public class WeatherDB {
 	private final static String TAG = "lee";
 	
-	private static final int DB_VERSION = 2;
+	private static final int DB_VERSION = 1;
 	private static WeatherDB weatherDB;
 	private SQLiteDatabase db;
 	
@@ -43,6 +43,7 @@ public class WeatherDB {
 		String myPath = DBHelper.DB_PATH + DBHelper.DB_NAME;
 		db = SQLiteDatabase.openDatabase(myPath, null, 
 				SQLiteDatabase.OPEN_READWRITE);
+		Log.v(TAG, "openDataBase db getVersion:" + db.getVersion());
 	}
 	
 	public synchronized void closeDataBase(){
@@ -58,6 +59,7 @@ public class WeatherDB {
 	
 	public synchronized static WeatherDB getInstanceDatabase(Context context) throws Exception{
 		if(weatherDB == null){
+			Log.v(TAG, "weatherDB == null");
 			weatherDB = new WeatherDB(context);
 		}
 		return weatherDB;
@@ -170,7 +172,11 @@ public class WeatherDB {
 		
 		return db.update(DBHelper.WEATHER_TABLE_NAME, values, "cityCode = ?", new String[]{cityCode});
 	}
-	
+
+	/**
+	 * 获得weatherTable中的所有天气数据
+	 * @return
+     */
 	public List<Weather> loadWeathers() {
 		List<Weather> weathers = new ArrayList<Weather>();
 		Cursor cursor = db.query(DBHelper.WEATHER_TABLE_NAME, null, null, null, null, null, null);

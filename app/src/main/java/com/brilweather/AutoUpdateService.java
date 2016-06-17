@@ -25,9 +25,9 @@ import android.widget.Toast;
 
 public class AutoUpdateService extends Service {
 
-	private static final String TAG = "LEE";
+	private static final String TAG = "LEE AutoUpdateService";
 	WeatherDB weatherDB = null;
-	List<Weather> weathers = new ArrayList<Weather>();
+	List<Weather> weathers = new ArrayList<>();
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -53,7 +53,7 @@ public class AutoUpdateService extends Service {
 			}
 		}).start();
 		AlarmManager manager = (AlarmManager)getSystemService(ALARM_SERVICE);
-		int anHour = 8*60*60*1000;			//设定后台更新时间为8h
+		int anHour = 4*60*60*1000;			//设定后台更新时间为8h
 		long triggerAtTime = SystemClock.elapsedRealtime() + anHour;
 		Intent i = new Intent(this, AutoUpdateReceiver.class);
 		PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);
