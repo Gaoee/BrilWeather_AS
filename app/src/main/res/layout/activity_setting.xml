@@ -4,6 +4,44 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+	<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="50dp"
+		android:background="@color/gray">
+
+		<Button
+			android:id="@+id/backSetting_but"
+			android:layout_alignParentLeft="true"
+			android:layout_height="20dp"
+			android:layout_width="40dp"
+			android:background="@drawable/goback"
+			android:layout_centerVertical="true"/>
+
+		<View
+			android:id="@+id/separate_view"
+			android:layout_width="4px"
+			android:layout_height="match_parent"
+			android:background="@android:color/black"
+			android:layout_marginBottom="15dp"
+			android:layout_marginTop="15dp"
+			android:layout_marginRight="6dp"
+			android:layout_toRightOf="@id/backSetting_but"/>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="设置"
+			android:textSize="21sp"
+			android:layout_toRightOf="@id/separate_view"
+			android:layout_centerVertical="true"/>
+
+		<View
+			android:layout_width="0px"
+			android:layout_height="0px"
+			android:layout_below="@id/backSetting_but"/>
+
+	</RelativeLayout>
+
     <RelativeLayout 
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -54,7 +92,8 @@
 	        android:layout_alignParentRight="true"
 	        android:layout_centerVertical="true"
 	        android:layout_below="@id/updata_freq_text"
-	        android:layout_marginRight="5dp"/>
+	        android:layout_marginRight="5dp"
+			android:scrollbarStyle="outsideOverlay"/>
         
     </RelativeLayout>
     

@@ -18,16 +18,16 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class  DeleteAdapter  extends ArrayAdapter<String> {
+public class  DeleteAdapter  extends ArrayAdapter<City> {
 	private final String TAG = "LEE";
-	List<String> cities;
+	List<City> cities;
 	Context mContext;
 	WeatherDB weatherDB;
 
 	private int resourceId;
 	
 	public DeleteAdapter(Context context, int resource, int textViewResourceId,
-			List<String> objects) {
+			List<City> objects) {
 		super(context, resource, textViewResourceId, objects);
 		resourceId = resource;
 		cities = objects;
@@ -60,13 +60,13 @@ public class  DeleteAdapter  extends ArrayAdapter<String> {
 		}
 		
 		Log.v(TAG, "Bttton:" + holder.deleteButton);
-		holder.itemTextView.setText(getItem(position));
+		holder.itemTextView.setText(getItem(position).getCityName());
 		
 		holder.deleteButton.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				weatherDB.deleteCity(cities.get(positionId));
+				weatherDB.deleteCity(cities.get(positionId).getCityCode());			//需要修改成cityCode
 				cities.remove(positionId);
 				notifyDataSetChanged();
 //				Toast.makeText(getContext(), "click No." + positionId + "button", 

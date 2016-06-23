@@ -84,7 +84,7 @@ public class WeatherDB {
 		return provinceList;
 	}
 
-	/*
+	/**
 	 * 查询所有的城市
 	 * */
 	public List<City> loadCitys(int province_id) {
@@ -110,13 +110,14 @@ public class WeatherDB {
 	}
 
 	
-	/*
+	/**
 	 * 查询所有选择的城市
 	 * */
 	public List<City> loadSelectedCity() {
 		List<City> selectedCityList = new ArrayList<City>();
 		Log.v(TAG, "loadSelectedCity");
-		Cursor cursor = db.query(DBHelper.WEATHER_TABLE_NAME, new String[]{"id", "cityName", "cityCode"}, null, null, null, null, null);
+		Cursor cursor = db.query(DBHelper.WEATHER_TABLE_NAME, new String[]{"id", "cityName", "cityCode"},
+				null, null, null, null, "OrderId");
 		
 		Log.v(TAG, "cursor:" + cursor.getCount());
 		if (cursor.moveToFirst()) {
@@ -136,34 +137,79 @@ public class WeatherDB {
 		return selectedCityList;
 	}
 	
-	/*
+	/**
 	 *删除某个城市 
 	 * */
 	public int deleteCity(int cityId) {
 		return db.delete(DBHelper.WEATHER_TABLE_NAME, "id = ?",new String[]{String.valueOf(cityId)});
 	}
 	
-	/*
+	/**
 	 *删除某个城市 
 	 * */
-	public int deleteCity(String cityName) {
-		return db.delete(DBHelper.WEATHER_TABLE_NAME, "cityName = ?",new String[]{String.valueOf(cityName)});
+	public int deleteCity(String cityCode) {
+		return db.delete(DBHelper.WEATHER_TABLE_NAME, "cityCode = ?",new String[]{String.valueOf(cityCode)});
 	}
 	
-	/*
+	/**
 	 * 添加一个城市
 	 * */
 	public long addSecletCity(String cityName, String cityCode) {
 		ContentValues values = new ContentValues();
 		values.put("cityName", cityName);
 		values.put("cityCode", cityCode);
+		int orderId = getLastSeletCity();
+		values.put("OrderId", orderId + 1);
 		return db.insert(DBHelper.WEATHER_TABLE_NAME, null, values);
 	}
-	
-	/*
+
+	/**
+	 * 获得当前最大OrderId
+	 * @return
+     */
+	private int getLastSeletCity(){
+		int lastCityOrderId = 0;
+		Cursor cursor = db.rawQuery("SELECT max(OrderId) AS maxOrderId FROM " + DBHelper.WEATHER_TABLE_NAME
+		 + " GROUP BY OrderId ", null);
+		if (cursor.moveToFirst()){
+			lastCityOrderId = cursor.getInt(cursor.getColumnIndex("maxOrderId"));
+		}
+		if (cursor != null){
+			cursor.close();
+		}
+		Log.v(TAG, "lastCityOrderId:" + lastCityOrderId);
+		return lastCityOrderId;
+	}
+
+	/**
+	 * 重新排列城市顺序，
+	 * @param cities 通过城市名来查找是不严谨的，以后要修改成cityCode来查找
+	 * @return
+     */
+	public boolean updateWeatherOrder(List<City> cities){
+		if(cities.size() == 0){
+			return true;
+		}
+
+		for(int i = 0; i < cities.size(); i++){
+			String cityCode = cities.get(i).getCityCode();
+			ContentValues values = new ContentValues();
+			values.put("OrderId", i+1);
+			try{
+				db.update(DBHelper.WEATHER_TABLE_NAME, values, "cityCode = ?", new String[]{cityCode});
+			}catch (SQLException e){
+				e.printStackTrace();
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 *更新天气 
 	 * */
-	public int updataWeather(String cityCode, String temp1, String temp2, String weatherDesp, String publicTime){
+	public int updateWeather(String cityCode, String temp1, String temp2, String weatherDesp, String publicTime){
 		ContentValues values = new ContentValues();
 		values.put("temp1", temp1);
 		values.put("temp2", temp2);
@@ -179,7 +225,7 @@ public class WeatherDB {
      */
 	public List<Weather> loadWeathers() {
 		List<Weather> weathers = new ArrayList<Weather>();
-		Cursor cursor = db.query(DBHelper.WEATHER_TABLE_NAME, null, null, null, null, null, null);
+		Cursor cursor = db.query(DBHelper.WEATHER_TABLE_NAME, null, null, null, null, null, "OrderId");
 		if(cursor.moveToFirst()){
 			do{
 				Weather weather = new Weather();

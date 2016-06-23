@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -20,6 +21,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 
 import com.brilweather.DB.WeatherDB;
+import com.brilweather.citymanage.CityAdapter;
 import com.brilweather.citymanage.DeleteAdapter;
 import com.brilweather.model.City;
 import com.example.brilweather.R;
@@ -28,8 +30,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class CitymanageActivity extends Activity implements OnClickListener{
-	private static final String TAG = "LEE";
+public class CitymanageActivity extends Activity implements OnClickListener ,AdapterView.OnItemClickListener{
+	private static final String TAG = "LEE CitymanageActivity";
 	
 	private ListView mListView;
 	private Button eidButton;
@@ -47,12 +49,12 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 	private RelativeLayout relaLayout1;
 	private RelativeLayout relaLayout2;
 	
-	private ArrayAdapter<String> mAdapter1;
-	private ArrayAdapter<String> mAdapter2;
+	private ArrayAdapter<City> mAdapter1;
+	private ArrayAdapter<City> mAdapter2;
 	
-	private List<String> list;
-	private List<String> citiesList;
-	private List<String> citiesCopyList;
+	private List<City> list;
+	private List<City> citiesList;
+	//private List<String> citiesCopyList;
 	
 	private Context mContext;
 	private WeatherDB weatherDB;
@@ -88,16 +90,17 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 		gobackButton.setOnClickListener(this);
 	
 		Log.v(TAG, "getCities");
-		citiesList = new ArrayList<String>();
-		citiesCopyList = new ArrayList<String>();
+		citiesList = new ArrayList<City>();
+		//citiesCopyList = new ArrayList<String>();
 		
 		List<String> list = new ArrayList<String>();
 		list.add("1");
 		list.add("2");
-		mAdapter1 = new ArrayAdapter<String>(this, R.layout.cities_mag_item, R.id.city_tex,
+		mAdapter1 = new CityAdapter(this, R.layout.cities_mag_item, R.id.city_tex,
 				citiesList);
 		mListView.setAdapter(mAdapter1);
-		
+		mListView.setOnItemClickListener(this);
+
 		mAdapter2 = new DeleteAdapter(this, R.layout.cities_magd_item,
 				R.id.city_tex, citiesList);
 		
@@ -106,7 +109,9 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 		mAddButtonHeight = (int)(mDensity * 30);
 		DisplayMetrics dm = new DisplayMetrics();
 	    getWindowManager().getDefaultDisplay().getMetrics(dm);
-	    mWindowsWidth = dm.widthPixels;    //得到宽度 
+	    mWindowsWidth = dm.widthPixels;    //得到宽度
+
+
 	}
 	
 	@Override
@@ -115,8 +120,8 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 		
 		citiesList.clear();
 		list = getCities();
-		for (String cityName : list) {
-			citiesList.add(cityName);
+		for (City city : list) {
+			citiesList.add(city);
 		}
 		mAdapter1.notifyDataSetChanged();
 		
@@ -132,7 +137,6 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 			animateOpen(relaLayout2);
 			
 			mListView.setAdapter(mAdapter2);
-			//mAdapter2.notifyDataSetChanged();
 			//开始事务
 			weatherDB.beginTransaction();
 			break;
@@ -145,10 +149,14 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 			
 			//提交事务
 			weatherDB.commitTransaction();
+
+			//重新排列城市顺序，假设citiesList是排序后的城市列表
+			weatherDB.updateWeatherOrder(citiesList);
+			//重新从数据库中加载城市数据
 			citiesList.clear();
 			list = getCities();
-			for (String cityName : list) {
-				citiesList.add(cityName);
+			for (City city : list) {
+				citiesList.add(city);
 			}
 			mListView.setAdapter(mAdapter1);
 			addButton.setVisibility(View.VISIBLE);
@@ -164,8 +172,8 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 			weatherDB.cancelTransaction();
 			citiesList.clear();
 			list = getCities();
-			for (String cityName : list) {
-				citiesList.add(cityName);
+			for (City city : list) {
+				citiesList.add(city);
 			}
 			mListView.setAdapter(mAdapter1);
 			addButton.setVisibility(View.VISIBLE);
@@ -189,18 +197,33 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 			break;
 		}
 	}
+
+	/**
+	 * 点击后跳指定城市的天气信息页面，暂时还没有用
+	 * @param parent
+	 * @param view
+	 * @param position
+     * @param id
+     */
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		ListView listView = (ListView) parent;
+		if(relaLayout1.getVisibility() == View.VISIBLE) {
+//			City city = (City)listView.getItemAtPosition(position);
+//			Intent intent = new Intent(CitymanageActivity.this, WeatherActivity.class);
+//			intent.setAction(WeatherActivity.SCROLL_ACTION);
+//			intent.putExtra("cityId", position);
+//			Log.v(TAG, "position" + position);
+//			intent.putExtra("cityName", city.getCityName());
+//			startActivity(intent);
+//			finish();
+		}
+	}
 	
-	private List<String> getCities() {
+	private List<City> getCities() {
 		List<City> citiesList = new ArrayList<City>();
 		citiesList = weatherDB.loadSelectedCity();
-		List<String> cities = new ArrayList<String>();
-		for (Iterator<City> iterator = citiesList.iterator(); iterator.hasNext();) {
-			City city = iterator.next();
-			Log.v(TAG, "cityName:" + city.getCityName());
-			cities.add(city.getCityName());
-		}
-		Log.v(TAG, "Cities count:" + cities.size());
-		return cities;
+		return citiesList;
 	}
 	
 	
@@ -291,4 +314,6 @@ public class CitymanageActivity extends Activity implements OnClickListener{
 		}
 		super.onBackPressed();
 	}
+
+
 }

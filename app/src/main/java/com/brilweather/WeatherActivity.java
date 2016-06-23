@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -26,8 +27,8 @@ import com.brilweather.http.HttpUtil;
 import com.brilweather.model.City;
 import com.brilweather.model.Weather;
 import com.brilweather.weathershow.HorizontalScrollViewEx;
+import com.brilweather.weathershow.MySwipeRefreshLayout;
 import com.brilweather.weathershow.MyUtils;
-import com.brilweather.weathershow.ScrollViewCallbackListene;
 import com.example.brilweather.R;
 
 import org.json.JSONException;
@@ -42,7 +43,9 @@ import java.util.Locale;
 
 
 public class WeatherActivity extends Activity implements OnClickListener{
-    private static final String TAG = "LEEWeatherActivity";
+    private static final String TAG = "LEE WeatherActivity";
+
+	public static final String SCROLL_ACTION = "Scroll_Action";
 
 	private boolean isInitView = false;
 	private boolean isOnPageChanged = false;
@@ -51,7 +54,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
     private TextView cityNameTextView;
     private Button loactionMagButton;
     private Button weatherMenu;
-	private SwipeRefreshLayout swipeRefreshLayout;
+	private MySwipeRefreshLayout swipeRefreshLayout;
 
     private List<ViewGroup> layoutList;
 
@@ -60,6 +63,8 @@ public class WeatherActivity extends Activity implements OnClickListener{
     private List<City> cities;
 
     private ProgressDialog progressDialog;
+
+	private boolean isSwipeRefershEnable = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +76,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
         cityNameTextView = (TextView)findViewById(R.id.city_name);
         loactionMagButton = (Button)findViewById(R.id.city_mag);
         weatherMenu = (Button)findViewById(R.id.weather_menu);
-		swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swiperefresh);
+		swipeRefreshLayout = (MySwipeRefreshLayout) findViewById(R.id.swiperefresh);
 
         loactionMagButton.setOnClickListener(this);
         weatherMenu.setOnClickListener(this);
@@ -85,19 +90,44 @@ public class WeatherActivity extends Activity implements OnClickListener{
         Log.d(TAG, "onCreate");
         layoutList = new ArrayList<ViewGroup>();
 
-        mListContainer.setScrollViewCallbackListene(new ScrollViewCallbackListene() {
+        mListContainer.setScrollViewCallbackListener(new HorizontalScrollViewEx.onScrollViewCallbackListener() {
 
 			@Override
 			public void onPageChanged(int pageIndex) {
 				isOnPageChanged = true;
 
+				swipeRefreshLayout.setRefreshing(false);
 				cityNameTextView.setText(weathers.get(pageIndex).getCityName());
 				//初始时，通过http加载最新数据，形成了一个递归
 				updateWeather(getCurrentPage());
 
 				isOnPageChanged = false;
 			}
-        });
+
+			//下面的代码解决的是SwipeRefersh与HorizontalScroll之间的滑动冲突问题
+			@Override
+			public void onPageScrolled(int position, float positionOffset) {
+				Log.v(TAG, "position:" + position);
+				Log.v(TAG, "positionOffset" + positionOffset);
+				if (isSwipeRefershEnable && positionOffset != 0) {
+					swipeRefreshLayout.setEnabled(false);
+					isSwipeRefershEnable = false;
+				}
+			}
+			@Override
+			public void onPageScrollStateChanged(int state) {
+				switch (state){
+					case HorizontalScrollViewEx.SCROLL_STATE_IDLE:
+						Log.v(TAG, "HorizontalScrollViewEx.SCROLL_STATE_IDLE");
+						swipeRefreshLayout.setEnabled(true);
+						isSwipeRefershEnable = true;
+						break;
+					default:
+						break;
+				}
+			}
+		});
+
 
 		swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.RED, Color.YELLOW);
 		swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -105,6 +135,21 @@ public class WeatherActivity extends Activity implements OnClickListener{
 			public void onRefresh() {
 				int currentCityId = getCurrentPage();
 				updateWeather(currentCityId);
+			}
+		});
+
+		swipeRefreshLayout.setOnGiveUpTouchEventListener(new MySwipeRefreshLayout.GiveUpTouchEventListener(){
+			@Override
+			public boolean giveUpTouchEven(MotionEvent ev) {
+				ListView listView = (ListView) layoutList.get(getCurrentPage()).findViewById(R.id.list);
+				if(listView.getFirstVisiblePosition() == 0){
+					View view = listView.getChildAt(0);
+					Log.v(TAG, "view.getTop():" + view.getTop());
+					if(view != null && view.getTop() >= 0){
+						return true;
+					}
+				}
+				return false;
 			}
 		});
 
@@ -117,17 +162,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 	@Override
 	protected void onStart() {
 		super.onStart();
-		mListContainer.scrollToSelectedPage(1);
 
-//		HashSet<String> hashSet = new HashSet<>();
-//		TreeSet<String> treeSet = new TreeSet<>();
-//		LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
-//		Iterator<String> iterator = linkedHashSet.iterator();
-//		iterator.hasNext();
-//
-//		SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
-//		SharedPreferences.Editor editor = sharedPreferences.edit();
-//		editor.putStringSet("123", linkedHashSet);
 	}
 
 	@Override
@@ -135,6 +170,8 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		super.onResume();
 		mListContainer.removeAllViews();
 		initView();
+
+		scrollToSelectedPage();
 	}
 
 	private void initView() {
@@ -200,6 +237,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		despTextView.setText(weather.getDesp());
 		minTempTextView.setText(weather.getMinTemp());
 		maxTempTextView.setText(weather.getMaxTemp());
+
 		Log.i(TAG, "updateView finish!");
     }
 
@@ -239,7 +277,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 				weather.setMaxTemp(w.getMaxTemp());
 				weather.setMinTemp(w.getMinTemp());
 				weather.setTime(w.getTime());
-				weatherDB.updataWeather(weather.getCityCode(), weather.getMinTemp(),
+				weatherDB.updateWeather(weather.getCityCode(), weather.getMinTemp(),
 						weather.getMaxTemp(), weather.getDesp(), weather.getTime());
 				Log.i(TAG, "getOnHttpWeather:" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
 						+ weather.getDesp() + weather.getTime());
@@ -407,5 +445,21 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		default:
 			break;
 		}
+	}
+
+	private void scrollToSelectedPage(){
+		Intent intent = getIntent();
+		if(intent.getAction().equals(SCROLL_ACTION)){
+			int pageId = intent.getIntExtra("cityId", 0);
+			Log.v(TAG, "pageId" + pageId);
+			String cityName = intent.getStringExtra("cityName");
+			cityNameTextView.setText(cityName);
+			mListContainer.scrollToSelectedPage(pageId);
+		}
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		return super.onTouchEvent(event);
 	}
 }

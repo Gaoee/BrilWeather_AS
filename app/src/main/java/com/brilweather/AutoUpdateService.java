@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
-import android.widget.Toast;
 
 public class AutoUpdateService extends Service {
 
@@ -53,7 +52,7 @@ public class AutoUpdateService extends Service {
 			}
 		}).start();
 		AlarmManager manager = (AlarmManager)getSystemService(ALARM_SERVICE);
-		int anHour = 4*60*60*1000;			//设定后台更新时间为8h
+		int anHour = 4*60*60*1000;			//设定后台更新时间为4h
 		long triggerAtTime = SystemClock.elapsedRealtime() + anHour;
 		Intent i = new Intent(this, AutoUpdateReceiver.class);
 		PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);
@@ -83,7 +82,7 @@ public class AutoUpdateService extends Service {
 					weather.setMaxTemp(w.getMaxTemp());
 					weather.setMinTemp(w.getMinTemp());
 					weather.setTime(w.getTime());
-					weatherDB.updataWeather(weather.getCityCode(), weather.getMinTemp(), 
+					weatherDB.updateWeather(weather.getCityCode(), weather.getMinTemp(),
 							weather.getMaxTemp(), weather.getDesp(), weather.getTime());
 					Log.i(TAG,"AutoUpdateService" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
 							+ weather.getDesp() + weather.getTime());

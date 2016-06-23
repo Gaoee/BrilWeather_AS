@@ -9,8 +9,10 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.SectionIndexer;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 /**
  * @Description:用来处理集合中数据的显示与排
@@ -19,7 +21,7 @@ import android.widget.TextView;
 public class SortAdapter extends BaseAdapter implements SectionIndexer{
 	private List<SortModel> list = null;
 	private Context mContext;
-	
+
 	public SortAdapter(Context mContext, List<SortModel> list) {
 		this.mContext = mContext;
 		this.list = list;

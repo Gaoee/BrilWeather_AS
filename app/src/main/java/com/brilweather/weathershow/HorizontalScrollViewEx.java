@@ -1,7 +1,6 @@
 package com.brilweather.weathershow;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -12,6 +11,8 @@ import android.widget.Scroller;
 
 public class HorizontalScrollViewEx extends ViewGroup {
     private static final String TAG = "HorizontalScrollViewEx";
+
+    private static final float XSCROLL_DETECT = 15;
 
     private int mChildrenSize;
     private int mChildWidth;
@@ -28,7 +29,25 @@ public class HorizontalScrollViewEx extends ViewGroup {
     private Scroller mScroller;
     private VelocityTracker mVelocityTracker;
     
-    private ScrollViewCallbackListene scrollViewCallbackListene;
+    private onScrollViewCallbackListener scrollViewCallbackListener;
+
+    private boolean isSmothScrollBy = false;
+
+    /**
+     * Indicates that the pager is in an idle, settled state. The current page
+     * is fully in view and no animation is in progress.
+     */
+    public static final int SCROLL_STATE_IDLE = 0;
+
+    /**
+     * Indicates that the pager is currently being dragged by the user.
+     */
+    public static final int SCROLL_STATE_DRAGGING = 1;
+
+    /**
+     * Indicates that the pager is in the process of settling to a final position.
+     */
+    public static final int SCROLL_STATE_SETTLING = 2;
 
     public HorizontalScrollViewEx(Context context) {
         super(context);
@@ -53,8 +72,8 @@ public class HorizontalScrollViewEx extends ViewGroup {
         }
     }
 
-    public void setScrollViewCallbackListene(ScrollViewCallbackListene scrollViewCallbackListene) {
-		this.scrollViewCallbackListene = scrollViewCallbackListene;
+    public void setScrollViewCallbackListener(onScrollViewCallbackListener scrollViewCallbackListener) {
+		this.scrollViewCallbackListener = scrollViewCallbackListener;
 	}
     
     @Override
@@ -75,7 +94,8 @@ public class HorizontalScrollViewEx extends ViewGroup {
         case MotionEvent.ACTION_MOVE: {
             int deltaX = x - mLastXIntercept;
             int deltaY = y - mLastYIntercept;
-            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            Log.v(TAG, "Math.abs(deltaX):" + Math.abs(deltaX));
+            if (Math.abs(deltaX) > XSCROLL_DETECT && Math.abs(deltaX) > Math.abs(deltaY)) {
                 intercepted = true;
             } else {
                 intercepted = false;
@@ -115,6 +135,9 @@ public class HorizontalScrollViewEx extends ViewGroup {
             int deltaX = x - mLastX;
             int deltaY = y - mLastY;
             scrollBy(-deltaX, 0);
+            scrollViewCallbackListener.onPageScrolled(mChildIndex, deltaX);
+            //正在跟着手指滑动
+            scrollViewCallbackListener.onPageScrollStateChanged(SCROLL_STATE_DRAGGING);
             break;
         }
         case MotionEvent.ACTION_UP: {
@@ -130,10 +153,11 @@ public class HorizontalScrollViewEx extends ViewGroup {
             int dx = mChildIndex * mChildWidth - scrollX;
             
             if(mLastChildIndex != mChildIndex){
-            	scrollViewCallbackListene.onPageChanged(mChildIndex);
+            	scrollViewCallbackListener.onPageChanged(mChildIndex);
             }
             
             mLastChildIndex = mChildIndex;
+            isSmothScrollBy = true;
             smoothScrollBy(dx, 0);
             mVelocityTracker.clear();
             break;
@@ -203,16 +227,14 @@ public class HorizontalScrollViewEx extends ViewGroup {
      * 滚动到指定页面
      * @param pageIndex from 0 to n
      */
-    public void scrollToSelectedPage(int pageIndex) {
-
-        if(pageIndex <= 0 || pageIndex >= getChildCount()){
-            return;
-        }
-
+    public void scrollToSelectedPage(final int pageIndex) {
     	final int dx = pageIndex * mChildWidth;
     	post(new Runnable() {
             @Override
             public void run() {
+                if(pageIndex <= 0 || pageIndex >= getChildCount()){
+                    return;
+                }
                 scrollTo(dx, 0);
             }
         });
@@ -220,6 +242,8 @@ public class HorizontalScrollViewEx extends ViewGroup {
     
     private void smoothScrollBy(int dx, int dy) {
         mScroller.startScroll(getScrollX(), 0, dx, 0, 500);
+        //这在滑动到指定位置
+        scrollViewCallbackListener.onPageScrollStateChanged(SCROLL_STATE_SETTLING);
         invalidate();
     }
 
@@ -229,6 +253,13 @@ public class HorizontalScrollViewEx extends ViewGroup {
             scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
             postInvalidate();
         }
+        else{
+            //完成到指定位置的滑动
+            if (isSmothScrollBy) {
+                scrollViewCallbackListener.onPageScrollStateChanged(SCROLL_STATE_IDLE);
+                isSmothScrollBy = false;
+            }
+        }
     }
 
     @Override
@@ -236,4 +267,16 @@ public class HorizontalScrollViewEx extends ViewGroup {
         mVelocityTracker.recycle();
         super.onDetachedFromWindow();
     }
+
+    public interface onScrollViewCallbackListener {
+
+        void onPageChanged(int pageIndex);
+
+        void onPageScrolled(int position, float positionOffset);
+
+        void onPageScrollStateChanged(int state);
+
+    }
 }
+
+

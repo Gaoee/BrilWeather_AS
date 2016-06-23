@@ -30,6 +30,8 @@ public class DBHelper extends SQLiteOpenHelper {
 			+ "weatherDesp text,"
 			+ "publishTime text)";
 
+	private static final String ALTER_WEATHER_ADDORDERID = "ALTER TABLE " + WEATHER_TABLE_NAME
+			+ " ADD OrderId integer";
 
 	private final Context mContext;
 	
@@ -55,9 +57,12 @@ public class DBHelper extends SQLiteOpenHelper {
 		try {
 			db.execSQL(CREATE_WEATHER);
 			Log.v(TAG, "create weather table!");
+			db.execSQL(ALTER_WEATHER_ADDORDERID);
+			Log.v(TAG, "ALTER_WEATHER_ADDORDERID");
 		} catch (SQLException e) {
 			Log.v(TAG, e.toString());
 		}
+
 	}
 
 	//在version发生变化的时候调用
@@ -65,6 +70,12 @@ public class DBHelper extends SQLiteOpenHelper {
 		Log.v(TAG, "onUpgrade oldVersion:" + oldVersion);
 		switch (oldVersion) {
 			case 1:
+//				try {
+//					db.execSQL(ALTER_WEATHER_ADDORDERID);
+//					Log.v(TAG, "ALTER_WEATHER_ADDORDERID");
+//				} catch (SQLException e) {
+//					Log.v(TAG, e.toString());
+//				}
 
 			default:
 				break;
