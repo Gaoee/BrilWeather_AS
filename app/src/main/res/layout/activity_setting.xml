@@ -1,119 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+			  android:layout_width="match_parent"
+			  android:layout_height="match_parent"
+			  android:background="#FFE1E1E1"
+			  android:orientation="vertical">
 
 	<RelativeLayout
 		android:layout_width="match_parent"
 		android:layout_height="50dp"
-		android:background="@color/gray">
+		android:background="@color/light_blue">
 
-		<Button
-			android:id="@+id/backSetting_but"
-			android:layout_alignParentLeft="true"
-			android:layout_height="20dp"
-			android:layout_width="40dp"
-			android:background="@drawable/goback"
-			android:layout_centerVertical="true"/>
-
-		<View
-			android:id="@+id/separate_view"
-			android:layout_width="4px"
-			android:layout_height="match_parent"
-			android:background="@android:color/black"
-			android:layout_marginBottom="15dp"
-			android:layout_marginTop="15dp"
-			android:layout_marginRight="6dp"
-			android:layout_toRightOf="@id/backSetting_but"/>
-
-		<TextView
+		<LinearLayout
+			android:id="@+id/goback_layout"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="设置"
-			android:textSize="21sp"
-			android:layout_toRightOf="@id/separate_view"
-			android:layout_centerVertical="true"/>
+			android:layout_centerVertical="true">
+			<Button
+				android:layout_height="26dp"
+				android:layout_width="40dp"
+				android:background="@drawable/goback"/>
+
+			<View
+				android:layout_width="3dp"
+				android:layout_height="match_parent"
+				android:background="@android:color/black"
+				android:layout_margin="4dp"/>
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="设置"
+				android:textColor="@android:color/black"
+				android:textSize="21sp"/>
+		</LinearLayout>
 
 		<View
 			android:layout_width="0px"
 			android:layout_height="0px"
-			android:layout_below="@id/backSetting_but"/>
+			android:layout_below="@id/goback_layout"/>
 
 	</RelativeLayout>
 
-    <RelativeLayout 
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        
-        <TextView 
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="后台更新"
-            android:textSize="20dp"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"/>
-        
-        <ToggleButton
-	        android:id="@+id/toggleButton1"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="ToggleButton" 
-	        android:layout_alignParentRight="true"
-	        android:layout_centerVertical="true"
-	        android:layout_marginRight="5dp"/>
-        
-    </RelativeLayout>
-    
-    <View 
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="#A8A8A8"
-        android:layout_margin="1dp"/>
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_margin="16dp"
+		android:orientation="vertical"
+		android:background="@drawable/table_view_rectangle">
 
-    <RelativeLayout 
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        
-        <TextView 
-            android:id="@+id/updata_freq_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="更新频率设置"
-            android:textSize="20dp"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="10dp"/>
-        
-        <SeekBar
-	        android:id="@+id/seekBar1"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentRight="true"
-	        android:layout_centerVertical="true"
-	        android:layout_below="@id/updata_freq_text"
-	        android:layout_marginRight="5dp"
-			android:scrollbarStyle="outsideOverlay"/>
-        
-    </RelativeLayout>
-    
-    <View 
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="#A8A8A8"
-        android:layout_margin="1dp"/>
-    
-	<android.support.v4.view.ViewPager
-        android:id="@+id/viewpager"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="50dp">
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="后台更新"
+				android:textSize="17dp"
+				android:layout_centerVertical="true"
+				android:layout_marginLeft="25dp"/>
 
-        <android.support.v4.view.PagerTabStrip
-            android:id="@+id/tabstrip"
-            android:layout_width="wrap_content"
-            android:layout_height="50dip"
-            android:gravity="center" />
-        
-    </android.support.v4.view.ViewPager>
+			<Switch
+				android:id="@+id/auto_update_switch"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="25dp"
+				android:layout_centerVertical="true"
+				android:layout_alignParentRight="true"/>
+		</RelativeLayout>
+
+
+		<View
+			android:layout_marginLeft="12dp"
+			android:layout_marginRight="12dp"
+			style="@style/HorizontalDivider"/>
+
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="50dp">
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="更新频率"
+				android:textSize="17dp"
+				android:layout_centerVertical="true"
+				android:layout_marginLeft="25dp"/>
+
+			<Spinner
+				android:layout_width="110dp"
+				android:layout_height="wrap_content"
+				android:id="@+id/update_freq"
+				android:entries="@array/spingarr"
+				android:layout_marginRight="25dp"
+				android:layout_centerVertical="true"
+				android:layout_alignParentRight="true"/>
+			<ImageButton
+				android:id="@+id/update_freq_hider"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:layout_marginLeft="12dp"
+				android:layout_marginRight="12dp"
+				android:background="#c2f9f3f3"/>
+
+
+		</RelativeLayout>
+		<View
+			android:layout_marginLeft="12dp"
+			android:layout_marginRight="12dp"
+			style="@style/HorizontalDivider"/>
+
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="50dp">
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="当前位置天气"
+				android:textSize="17dp"
+				android:layout_centerVertical="true"
+				android:layout_marginLeft="25dp"/>
+
+			<Switch
+				android:id="@+id/locateweather_switch"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="25dp"
+				android:layout_centerVertical="true"
+				android:layout_alignParentRight="true"/>
+		</RelativeLayout>
+
+		<View
+			android:layout_marginLeft="12dp"
+			android:layout_marginRight="12dp"
+			style="@style/HorizontalDivider"/>
+
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="50dp">
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="消息通知"
+				android:textSize="17dp"
+				android:layout_centerVertical="true"
+				android:layout_marginLeft="25dp"/>
+
+			<Switch
+				android:id="@+id/send_message_switch"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="25dp"
+				android:layout_centerVertical="true"
+				android:layout_alignParentRight="true"/>
+		</RelativeLayout>
+
+		<View
+			android:layout_marginLeft="12dp"
+			android:layout_marginRight="12dp"
+			style="@style/HorizontalDivider"/>
+	</LinearLayout>
+
+
     
 </LinearLayout>

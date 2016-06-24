@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -38,7 +39,7 @@ public class CitymanageActivity extends Activity implements OnClickListener ,Ada
 	private Button commitButton;
 	private Button canelButton;
 	private ImageButton addButton;
-	private Button gobackButton;
+	private LinearLayout gobackButton;
 	private View lineView;
 	
 	private float mDensity;
@@ -76,7 +77,7 @@ public class CitymanageActivity extends Activity implements OnClickListener ,Ada
 		commitButton = (Button)findViewById(R.id.commit_but);
 		canelButton = (Button)findViewById(R.id.cancel_but);
 		addButton = (ImageButton)findViewById(R.id.add_but);
-		gobackButton = (Button)findViewById(R.id.backtoweather_but);
+		gobackButton = (LinearLayout) findViewById(R.id.backtoweather_but);
 		mListView = (ListView)findViewById(R.id.city_listview);
 		lineView = (View)findViewById(R.id.line_view);
 		

@@ -13,6 +13,7 @@ import com.brilweather.DB.WeatherDB;
 import com.brilweather.http.HttpCallbackListene;
 import com.brilweather.http.HttpUtil;
 import com.brilweather.model.Weather;
+import com.brilweather.weathersetting.MySharedPreferences;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -52,7 +53,10 @@ public class AutoUpdateService extends Service {
 			}
 		}).start();
 		AlarmManager manager = (AlarmManager)getSystemService(ALARM_SERVICE);
-		int anHour = 4*60*60*1000;			//设定后台更新时间为4h
+		String updateFrequencyString = MySharedPreferences.getMySharePrefereces().readFreqTime();
+		int updateFrequency = Integer.valueOf(updateFrequencyString.substring(0,updateFrequencyString.length()-2));
+		Log.v(TAG, "updateFrequency:" + updateFrequency);
+		int anHour = 60*1000;			//设定后台更新时间为4h updateFrequency*
 		long triggerAtTime = SystemClock.elapsedRealtime() + anHour;
 		Intent i = new Intent(this, AutoUpdateReceiver.class);
 		PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);

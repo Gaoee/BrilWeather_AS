@@ -12,7 +12,7 @@ import android.view.MotionEvent;
 public class MySwipeRefreshLayout extends SwipeRefreshLayout {
     private static final String TAG = "LEE MySwipeRe";
 
-    private int mTouchSlop;
+    private int mTouchSlop = 40;
     //分别记录上次滑动的坐标
     private int mLastX = 0;
     private int mLastY = 0;

@@ -26,6 +26,7 @@ import com.brilweather.http.HttpCallbackListene;
 import com.brilweather.http.HttpUtil;
 import com.brilweather.model.City;
 import com.brilweather.model.Weather;
+import com.brilweather.weathersetting.MySharedPreferences;
 import com.brilweather.weathershow.HorizontalScrollViewEx;
 import com.brilweather.weathershow.MySwipeRefreshLayout;
 import com.brilweather.weathershow.MyUtils;
@@ -154,9 +155,10 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		});
 
 		//开启定时更新服务
-		Intent intent = new Intent(this, AutoUpdateService.class);
-		startService(intent);
-
+		if(MySharedPreferences.getMySharePrefereces().readIsAutoUpdate()) {
+			Intent intent = new Intent(this, AutoUpdateService.class);
+			startService(intent);
+		}
     }
 
 	@Override
