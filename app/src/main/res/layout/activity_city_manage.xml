@@ -32,7 +32,7 @@
                android:layout_height="wrap_content"
                android:text="位置管理"
                android:textColor="@android:color/black"
-               android:textSize="20sp"/>
+               android:textSize="18sp"/>
 
         </LinearLayout>
         <Button 

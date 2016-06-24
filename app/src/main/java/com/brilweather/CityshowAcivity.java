@@ -152,10 +152,11 @@ public class CityshowAcivity extends Activity {
 						Toast.makeText(CityshowAcivity.this, "添加成功！", Toast.LENGTH_SHORT).show();
 						Intent i = getIntent();
 						Log.v(TAG," i.getAction():" + i.getAction());
-						if (i.getAction() == INTENT_ACTION_NOCITY){
-							Intent intent = new Intent(CityshowAcivity.this, WeatherActivity.class);
-							startActivity(intent);
-						}
+						Intent intent = new Intent(CityshowAcivity.this, WeatherActivity.class);
+						intent.setAction(WeatherActivity.SCROLL_ACTION);
+						intent.putExtra("cityName", city.getName());
+						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(intent);
 						finish();
 					} else {
 						Toast.makeText(CityshowAcivity.this, "添加失败！", Toast.LENGTH_SHORT).show();

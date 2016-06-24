@@ -227,17 +227,22 @@ public class HorizontalScrollViewEx extends ViewGroup {
      * 滚动到指定页面
      * @param pageIndex from 0 to n
      */
-    public void scrollToSelectedPage(final int pageIndex) {
+    public void scrollToSelectedPage(int pageIndex) {
+        if(pageIndex < 0 || pageIndex >= getChildCount()){
+            return;
+        }
+        Log.v(TAG, "pageIndex:" + pageIndex);
     	final int dx = pageIndex * mChildWidth;
-    	post(new Runnable() {
+
+    	boolean result = post(new Runnable() {
             @Override
             public void run() {
-                if(pageIndex <= 0 || pageIndex >= getChildCount()){
-                    return;
-                }
+                Log.v(TAG, "scrollTo(dx, 0)");
                 scrollTo(dx, 0);
             }
         });
+        Log.v(TAG, "post result:" + result);
+        mChildIndex = pageIndex;
 	}
     
     private void smoothScrollBy(int dx, int dy) {

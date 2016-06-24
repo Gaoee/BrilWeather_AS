@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -91,7 +92,32 @@ public class WeatherActivity extends Activity implements OnClickListener{
         Log.d(TAG, "onCreate");
         layoutList = new ArrayList<ViewGroup>();
 
-        mListContainer.setScrollViewCallbackListener(new HorizontalScrollViewEx.onScrollViewCallbackListener() {
+		//开启定时更新服务
+		if(MySharedPreferences.getMySharePrefereces().readIsAutoUpdate()) {
+			Intent intent = new Intent(this, AutoUpdateService.class);
+			startService(intent);
+		}
+    }
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		initView();
+		initData();
+	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		//activity已经绘制完成
+		if(hasFocus){
+			Log.v(TAG, "onWindowFocusChanged hasFocus");
+			scrollToSelectedPage();
+		}
+	}
+
+	private void initData(){
+		mListContainer.setScrollViewCallbackListener(new HorizontalScrollViewEx.onScrollViewCallbackListener() {
 
 			@Override
 			public void onPageChanged(int pageIndex) {
@@ -129,7 +155,6 @@ public class WeatherActivity extends Activity implements OnClickListener{
 			}
 		});
 
-
 		swipeRefreshLayout.setColorSchemeColors(Color.BLUE, Color.RED, Color.YELLOW);
 		swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 			@Override
@@ -154,29 +179,12 @@ public class WeatherActivity extends Activity implements OnClickListener{
 			}
 		});
 
-		//开启定时更新服务
-		if(MySharedPreferences.getMySharePrefereces().readIsAutoUpdate()) {
-			Intent intent = new Intent(this, AutoUpdateService.class);
-			startService(intent);
-		}
-    }
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		mListContainer.removeAllViews();
-		initView();
-
-		scrollToSelectedPage();
-	}
 
 	private void initView() {
+		mListContainer.removeAllViews();
+
 		isInitView = true;
 		Log.v(TAG, "initView()");
         LayoutInflater inflater = getLayoutInflater();
@@ -210,7 +218,6 @@ public class WeatherActivity extends Activity implements OnClickListener{
 
 		isInitView = false;
     }
-
 
 	/**
 	 * 只对页面进行更新，不更新天气数据
@@ -449,19 +456,24 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		}
 	}
 
+	/**
+	 * 滑动到指定页面
+	 */
 	private void scrollToSelectedPage(){
 		Intent intent = getIntent();
 		if(intent.getAction().equals(SCROLL_ACTION)){
-			int pageId = intent.getIntExtra("cityId", 0);
+			int pageId = intent.getIntExtra("cityId", layoutList.size() -1);
 			Log.v(TAG, "pageId" + pageId);
 			String cityName = intent.getStringExtra("cityName");
 			cityNameTextView.setText(cityName);
 			mListContainer.scrollToSelectedPage(pageId);
+			//改变action值，否则下次过来还是会进入这段代码
+			intent.setAction(" ");
+		}
+		else {
+			//一般的返回，返回到
+			mListContainer.scrollToSelectedPage(0);
 		}
 	}
 
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		return super.onTouchEvent(event);
-	}
 }

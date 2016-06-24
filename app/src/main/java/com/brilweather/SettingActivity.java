@@ -93,8 +93,8 @@ public class SettingActivity extends Activity implements View.OnClickListener{
 	}
 
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+	protected void onStop() {
+		super.onStop();
 
 		SettingData settingData = new SettingData();
 		Log.v(TAG, "mAutoUpdateBut.isChecked()" + mAutoUpdateBut.isChecked());
@@ -105,5 +105,10 @@ public class SettingActivity extends Activity implements View.OnClickListener{
 		settingData.setIsSendMessage(mSendMessageSwitch.isChecked());
 
 		mySharedPreferences.saveSettingData(settingData);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
 	}
 }

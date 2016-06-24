@@ -28,7 +28,6 @@ import com.brilweather.model.City;
 import com.example.brilweather.R;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class CitymanageActivity extends Activity implements OnClickListener ,AdapterView.OnItemClickListener{
@@ -55,8 +54,7 @@ public class CitymanageActivity extends Activity implements OnClickListener ,Ada
 	
 	private List<City> list;
 	private List<City> citiesList;
-	//private List<String> citiesCopyList;
-	
+
 	private Context mContext;
 	private WeatherDB weatherDB;
 	
@@ -210,14 +208,15 @@ public class CitymanageActivity extends Activity implements OnClickListener ,Ada
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		ListView listView = (ListView) parent;
 		if(relaLayout1.getVisibility() == View.VISIBLE) {
-//			City city = (City)listView.getItemAtPosition(position);
-//			Intent intent = new Intent(CitymanageActivity.this, WeatherActivity.class);
-//			intent.setAction(WeatherActivity.SCROLL_ACTION);
-//			intent.putExtra("cityId", position);
-//			Log.v(TAG, "position" + position);
-//			intent.putExtra("cityName", city.getCityName());
-//			startActivity(intent);
-//			finish();
+			City city = (City)listView.getItemAtPosition(position);
+			Intent intent = new Intent(CitymanageActivity.this, WeatherActivity.class);
+			intent.setAction(WeatherActivity.SCROLL_ACTION);
+			intent.putExtra("cityId", position);
+			Log.v(TAG, "position" + position);
+			intent.putExtra("cityName", city.getCityName());
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+			finish();
 		}
 	}
 	
