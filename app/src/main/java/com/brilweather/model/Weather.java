@@ -1,17 +1,14 @@
 package com.brilweather.model;
 
-import java.sql.Time;
-
-
 public class Weather {
 
 	private int id;
 	private String cityName;
 	private String cityCode;
-	private String temp1;
-	private String temp2;
-	private String desp;
-	private String time;
+	private String observe;
+	private String forecast;
+	private String index;
+	private String updateTime;
 
 	public void setId(int id) {
 		this.id = id;
@@ -28,7 +25,6 @@ public class Weather {
 		return this.cityName;
 	}
 	
-	
 	public void setCityCode(String code){
 		this.cityCode = code;
 	}
@@ -37,32 +33,31 @@ public class Weather {
 		return this.cityCode;
 	}
 	
-	public void setMinTemp(String temp) {
-		this.temp1 = temp;
+	public void setObserve(String observe) {
+		this.observe = observe;
 	}
-	public String getMinTemp(){
-		return this.temp1;
-	}
-	
-	public void setMaxTemp(String temp) {
-		this.temp2 = temp;
-	}
-	public String getMaxTemp(){
-		return this.temp2;
+	public String getObserve(){
+		return this.observe;
 	}
 	
-	public void setDesp(String desp) {
-		this.desp = desp;
+	public void setForecast(String forecast) {
+		this.forecast = forecast;
 	}
-	public String getDesp(){
-		return this.desp;
-	}
-	
-	public void setTime(String time) {
-		this.time = time;
-	}
-	public String getTime(){
-		return this.time;
+	public String getForecast(){
+		return this.forecast;
 	}
 	
+	public void setIndex(String index) {
+		this.index = index;
+	}
+	public String getIndex(){
+		return this.index;
+	}
+	
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+	public String getUpdateTime(){
+		return this.updateTime;
+	}
 }

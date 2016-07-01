@@ -7,4 +7,67 @@
         <item>12小时</item>
         <item>24小时</item>
     </string-array>
+
+    <string-array name="weather_phenomena">
+        <item>晴</item>
+        <item>多云</item>
+        <item>阴</item>
+        <item>阵雨</item>
+        <item>雷阵雨</item>
+        <item>雷阵雨伴有冰雹</item>
+        <item>雨夹雪</item>
+        <item>小雨</item>
+        <item>中雨</item>
+        <item>大雨</item>
+        <item>暴雨</item>
+        <item>大暴雨</item>
+        <item>特大暴雨</item>
+        <item>阵雪</item>
+        <item>小雪</item>
+        <item>中雪</item>
+        <item>大雪</item>
+        <item>暴雪</item>
+        <item>雾</item>
+        <item>冻雨</item>
+        <item>沙尘暴</item>
+        <item>小到中雨</item>
+        <item>中到大雨</item>
+        <item>大到暴雨</item>
+        <item>暴雨到大暴雨</item>
+        <item>大暴雨到特大暴雨</item>
+        <item>小到中雪</item>
+        <item>中到大雪</item>
+        <item>大到暴雪</item>
+        <item>浮尘</item>
+        <item>扬尘</item>
+        <item>强沙尘暴</item>
+        <item>霾</item>
+        <item>无</item>
+    </string-array>
+
+    <string-array name="wind_power">
+        <item>微风</item>
+        <item>3-4级</item>
+        <item>4-5级</item>
+        <item>5-6级</item>
+        <item>6-7级</item>
+        <item>7-8级</item>
+        <item>8-9级</item>
+        <item>9-10级</item>
+        <item>10-11级</item>
+        <item>11-12级</item>
+    </string-array>
+
+    <string-array name="wind_dir">
+        <item>无持续风向</item>
+        <item>东北风</item>
+        <item>东方</item>
+        <item>东南风</item>
+        <item>南风</item>
+        <item>西南风</item>
+        <item>西风</item>
+        <item>西北风</item>
+        <item>北风</item>
+        <item>旋转风</item>
+    </string-array>
 </resources>

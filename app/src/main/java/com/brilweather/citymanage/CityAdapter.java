@@ -44,7 +44,7 @@ public class CityAdapter extends ArrayAdapter<City> {
         ViewHolder holder = null;
         View view;
 
-        Log.v(TAG, "getItem(position).getCityName()" + getItem(position).getCityName());
+        Log.v(TAG, "getItem(position).getCurrentTemp()" + getItem(position).getCityName());
         if(convertView == null){
             holder = new ViewHolder();
             view = LayoutInflater.from(getContext()).inflate(resourceId, null);

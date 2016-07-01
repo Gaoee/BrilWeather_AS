@@ -1,6 +1,7 @@
 package com.brilweather;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -12,29 +13,27 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.brilweather.DB.WeatherDB;
 import com.brilweather.http.HttpCallbackListene;
 import com.brilweather.http.HttpUtil;
+import com.brilweather.http.JsonUtility;
 import com.brilweather.model.City;
+import com.brilweather.model.Forecast;
+import com.brilweather.model.Index;
+import com.brilweather.model.Observe;
 import com.brilweather.model.Weather;
 import com.brilweather.weathersetting.MySharedPreferences;
 import com.brilweather.weathershow.HorizontalScrollViewEx;
 import com.brilweather.weathershow.MySwipeRefreshLayout;
 import com.brilweather.weathershow.MyUtils;
 import com.example.brilweather.R;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +50,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 
 	private boolean isInitView = false;
 	private boolean isOnPageChanged = false;
+	private boolean isNoDialogShow = false;
 
     private HorizontalScrollViewEx mListContainer;
     private TextView cityNameTextView;
@@ -101,6 +101,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 
 	@Override
 	protected void onStart() {
+		isNoDialogShow = true;
 		super.onStart();
 		initView();
 		initData();
@@ -110,9 +111,10 @@ public class WeatherActivity extends Activity implements OnClickListener{
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 		//activity已经绘制完成
-		if(hasFocus){
+		if(hasFocus && isNoDialogShow){
 			Log.v(TAG, "onWindowFocusChanged hasFocus");
 			scrollToSelectedPage();
+			isNoDialogShow = false;
 		}
 	}
 
@@ -122,12 +124,11 @@ public class WeatherActivity extends Activity implements OnClickListener{
 			@Override
 			public void onPageChanged(int pageIndex) {
 				isOnPageChanged = true;
-
 				swipeRefreshLayout.setRefreshing(false);
 				cityNameTextView.setText(weathers.get(pageIndex).getCityName());
 				//初始时，通过http加载最新数据，形成了一个递归
-				updateWeather(getCurrentPage());
-
+				Log.v(TAG, "pageIndex:" + pageIndex + "  getCurrentPage():" + getCurrentPage());
+				updateWeather(pageIndex, 60);
 				isOnPageChanged = false;
 			}
 
@@ -160,20 +161,16 @@ public class WeatherActivity extends Activity implements OnClickListener{
 			@Override
 			public void onRefresh() {
 				int currentCityId = getCurrentPage();
-				updateWeather(currentCityId);
+				updateWeather(currentCityId, 16);
 			}
 		});
 
 		swipeRefreshLayout.setOnGiveUpTouchEventListener(new MySwipeRefreshLayout.GiveUpTouchEventListener(){
 			@Override
 			public boolean giveUpTouchEven(MotionEvent ev) {
-				ListView listView = (ListView) layoutList.get(getCurrentPage()).findViewById(R.id.list);
-				if(listView.getFirstVisiblePosition() == 0){
-					View view = listView.getChildAt(0);
-					Log.v(TAG, "view.getTop():" + view.getTop());
-					if(view != null && view.getTop() >= 0){
-						return true;
-					}
+				ScrollView scrollView = (ScrollView) layoutList.get(getCurrentPage()).findViewById(R.id.scrollView);
+				if(scrollView.getScrollY() == 0){
+					return true;
 				}
 				return false;
 			}
@@ -210,9 +207,8 @@ public class WeatherActivity extends Activity implements OnClickListener{
                     R.layout.content_layout, mListContainer, false);
             layout.getLayoutParams().width = screenWidth;
 
-            createList(layout);
             layoutList.add(layout);
-            updateView(i);
+			updateWeatherAndView(i);
             mListContainer.addView(layout);
         }
 
@@ -220,7 +216,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
     }
 
 	/**
-	 * 只对页面进行更新，不更新天气数据
+	 * 只对页面进行更新，不更新天气数据   需要更改
 	 * @param cityId
      */
     private void updateView(int cityId) {
@@ -229,34 +225,146 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		Log.v(TAG, "updateView cityID:" + cityId);
 		Weather weather = weathers.get(cityId);
 
-		TextView publishTextView = (TextView)layoutGroup.findViewById(R.id.publish_text);
-		TextView currentTextView = (TextView)layoutGroup.findViewById(R.id.current_date);
-		TextView despTextView = (TextView)layoutGroup.findViewById(R.id.weather_desp);
-		TextView minTempTextView = (TextView)layoutGroup.findViewById(R.id.min_temp);
-		TextView maxTempTextView = (TextView)layoutGroup.findViewById(R.id.max_temp);
-		ListView listView = (ListView)layoutGroup.findViewById(R.id.list);
+		TextView publishTimeTextView = (TextView)layoutGroup.findViewById(R.id.publishtime_text);
+		TextView currentTempTextView = (TextView)layoutGroup.findViewById(R.id.current_temp);
+		TextView currentWeatherTextView = (TextView)layoutGroup.findViewById(R.id.current_weather);
+		TextView airQualityTextView = (TextView)layoutGroup.findViewById(R.id.air_quality);
+		TextView weather1TextView = (TextView)layoutGroup.findViewById(R.id.weather1);
+		TextView weather2TextView = (TextView)layoutGroup.findViewById(R.id.weather2);
+		TextView weather3TextView = (TextView)layoutGroup.findViewById(R.id.weather3);
+		TextView temp1HigTextView = (TextView)layoutGroup.findViewById(R.id.temp1_hig);
+		TextView temp2HigTextView = (TextView)layoutGroup.findViewById(R.id.temp2_hig);
+		TextView temp3HigTextView = (TextView)layoutGroup.findViewById(R.id.temp3_hig);
+		TextView temp1LowTextView = (TextView)layoutGroup.findViewById(R.id.temp1_low);
+		TextView temp2LowTextView = (TextView)layoutGroup.findViewById(R.id.temp2_low);
+		TextView temp3LowTextView = (TextView)layoutGroup.findViewById(R.id.temp3_low);
+		TextView wind1TextView = (TextView)layoutGroup.findViewById(R.id.wind1);
+		TextView wind2TextView = (TextView)layoutGroup.findViewById(R.id.wind2);
+		TextView wind3TextView = (TextView)layoutGroup.findViewById(R.id.wind3);
+		RelativeLayout trafficLayout = (RelativeLayout)layoutGroup.findViewById(R.id.traffic);
+		TextView trafficIndexTextView = (TextView)layoutGroup.findViewById(R.id.traffic_index);
+		RelativeLayout coldLayout = (RelativeLayout)layoutGroup.findViewById(R.id.cold);
+		TextView coldIndexTextView = (TextView)layoutGroup.findViewById(R.id.cold_index);
+		RelativeLayout clothLayout = (RelativeLayout)layoutGroup.findViewById(R.id.cloth);
+		TextView clothIndexTextView = (TextView)layoutGroup.findViewById(R.id.cloth_index);
 
-		Log.i(TAG,"updateView" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
-				+ weather.getDesp() + weather.getTime());
+		JsonUtility jsonUtility = JsonUtility.getJsonUtility(getApplication());
+		String observeString = weather.getObserve();
+		String forecastString = weather.getForecast();
+		String indexString = weather.getIndex();
+		Log.v(TAG, "observeString:" + observeString);
+		Log.v(TAG, "forecastString:" + forecastString);
+		Log.v(TAG, "indexString:" + indexString);
+		Observe observe = jsonUtility.handObserve(observeString);
+		Forecast forecast = jsonUtility.handForeCast(forecastString);
+		final Index index = jsonUtility.handleIndex(indexString);
 
-		if (weather.getTime() != null) {
-			publishTextView.setText(weather.getTime().substring(10));
-			currentTextView.setText(weather.getTime().substring(0, 10));
+		publishTimeTextView.setText(observe.getPublishTime());
+		currentTempTextView.setText(observe.getCurrentTemp());
+		currentWeatherTextView.setText(observe.getWeatherDes());
+
+		Log.v(TAG, " forecast.getWeather_d1()" + forecast.getWeather_d1());
+		if(forecast.getWeather_d1().length() == 0){
+			weather1TextView.setText(forecast.getWeather_n1());
+			temp1LowTextView.setText(forecast.getTemp_n1());
+			temp1HigTextView.setText(observe.getCurrentTemp());
+			wind1TextView.setText(forecast.getWind_n1());
+
+			weather2TextView.setText(forecast.getWeather_n2());
+			temp2LowTextView.setText(forecast.getTemp_n2());
+			temp2HigTextView.setText(forecast.getTemp_d2());
+			wind2TextView.setText(forecast.getWind_n2());
+
+			weather3TextView.setText(forecast.getWeather_n3());
+			temp3LowTextView.setText(forecast.getTemp_n3());
+			temp3HigTextView.setText(forecast.getTemp_d3());
+			wind3TextView.setText(forecast.getWind_n3());
+		}else {
+			weather1TextView.setText(forecast.getWeather_d1());
+			temp1LowTextView.setText(forecast.getTemp_n1());
+			temp1HigTextView.setText(forecast.getTemp_d1());
+			wind1TextView.setText(forecast.getWind_d1());
+
+			weather2TextView.setText(forecast.getWeather_d2());
+			temp2LowTextView.setText(forecast.getTemp_n2());
+			temp2HigTextView.setText(forecast.getTemp_d2());
+			wind2TextView.setText(forecast.getWind_d2());
+
+			weather3TextView.setText(forecast.getWeather_d3());
+			temp3LowTextView.setText(forecast.getTemp_n3());
+			temp3HigTextView.setText(forecast.getTemp_d3());
+			wind3TextView.setText(forecast.getWind_d3());
 		}
-		despTextView.setText(weather.getDesp());
-		minTempTextView.setText(weather.getMinTemp());
-		maxTempTextView.setText(weather.getMaxTemp());
+		Log.v(TAG, "index.getTraffIndex()" + index.getTraffIndex());
+		trafficIndexTextView.setText(index.getTraffIndex());
+		coldIndexTextView.setText(index.getColdIndex());
+		clothIndexTextView.setText(index.getClothIndex());
 
+		Log.i(TAG,"updateView" + weather.getCityName() + weather.getCityCode() + weather.getObserve() + weather.getForecast()
+				+ weather.getIndex() + weather.getUpdateTime());
+
+		airQualityTextView.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+
+			}
+		});
+
+		trafficLayout.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						WeatherActivity.this);
+				builder.setTitle("交通建议");
+				builder.setMessage(index.getTraffSug());
+				builder.setCancelable(true);
+				builder.create().show();
+			}
+		});
+
+		coldLayout.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						WeatherActivity.this);
+				builder.setTitle("健康建议");
+				builder.setMessage(index.getColdSug());
+				builder.setCancelable(true);
+				builder.create().show();
+			}
+		});
+
+		clothLayout.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						WeatherActivity.this);
+				builder.setTitle("穿衣建议");
+				builder.setMessage(index.getClothSug());
+				builder.setCancelable(true);
+				builder.create().show();
+			}
+		});
 		Log.i(TAG, "updateView finish!");
     }
 
+	private void updateWeatherAndView(int cityId){
+		Weather weather = weathers.get(cityId);
+		if(isOtherDate(weather.getUpdateTime(), 16*60)){	//主动更新的时间
+			getOnHttpWeather(cityId);
+		}
+		else {
+			updateView(cityId);
+		}
+	}
+
 	/**
-	 * 更新cityCode指定的城市的天气数据,并最终调用updateView更新页面
+	 * 更新cityCode指定的城市的天气数据,并最终调用updateView更新页面     手动更新时必须更新
 	 * @param cityId
      */
-    private void updateWeather(int cityId) {
+    private void updateWeather(int cityId, int updateTime) {
 		Weather weather = weathers.get(cityId);
-		if(isOtherDate(weather.getTime())){
+		if(isOtherDate(weather.getUpdateTime(), updateTime)){
 			getOnHttpWeather(cityId);
 		}
 		else {
@@ -273,23 +381,21 @@ public class WeatherActivity extends Activity implements OnClickListener{
      */
 	private void getOnHttpWeather(final int cityId) {
 		final Weather weather = weathers.get(cityId);
-		String cityCode = weather.getCityCode();
-		String address = "http://www.weather.com.cn/data/cityinfo/"
-				+ cityCode + ".html";
+		final String cityCode = weather.getCityCode();
 		//showProgressDialog();
-		HttpUtil.sendHttpRequest(address, new HttpCallbackListene() {
+		HttpUtil.sendHttpRequest(cityCode, new HttpCallbackListene() {
 
 			@Override
 			public void onFinish(String reportString) {
-				Weather w = handleWeatherResponse(reportString);
-				weather.setDesp(w.getDesp());
-				weather.setMaxTemp(w.getMaxTemp());
-				weather.setMinTemp(w.getMinTemp());
-				weather.setTime(w.getTime());
-				weatherDB.updateWeather(weather.getCityCode(), weather.getMinTemp(),
-						weather.getMaxTemp(), weather.getDesp(), weather.getTime());
-				Log.i(TAG, "getOnHttpWeather:" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
-						+ weather.getDesp() + weather.getTime());
+				Weather w = JsonUtility.getJsonUtility(getApplication()).handleWeatherResponse(reportString, cityCode);
+				weather.setIndex(w.getIndex());
+				weather.setForecast(w.getForecast());
+				weather.setObserve(w.getObserve());
+				weather.setUpdateTime(w.getUpdateTime());
+				weatherDB.updateWeather(weather.getCityCode(), weather.getObserve(),
+						weather.getForecast(), weather.getIndex(), weather.getUpdateTime());
+				Log.i(TAG, "getOnHttpWeather:" + weather.getCityName() + weather.getCityCode() + weather.getObserve() + weather.getForecast()
+						+ weather.getIndex() + weather.getUpdateTime());
 				Log.v(TAG, "cityID:" + cityId);
 				runOnUiThread(new Runnable() {
 					public void run() {
@@ -329,27 +435,6 @@ public class WeatherActivity extends Activity implements OnClickListener{
 
     ///////////////////////////////////////////////////
 
-	private void createList(ViewGroup layout) {
-		ListView listView = (ListView) layout.findViewById(R.id.list);
-		ArrayList<String> datas = new ArrayList<String>();
-		for (int i = 0; i < 5; i++) {
-			datas.add("name " + i);
-		}
-
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				R.layout.content_list_item, R.id.name, datas);
-		listView.setAdapter(adapter);
-		listView.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-									int position, long id) {
-				Toast.makeText(WeatherActivity.this, "click item",
-						Toast.LENGTH_SHORT).show();
-
-			}
-		});
-	}
-
     private void showProgressDialog() {
 		if(progressDialog == null){
 			progressDialog = new ProgressDialog(this);
@@ -383,22 +468,23 @@ public class WeatherActivity extends Activity implements OnClickListener{
 
 
     /**
-     * 判断数据更新的时间是否超过了16个小时
+     * 判断数据更新的时间是否超过了updateTime分钟
      * @param date
+	 * @param updateTime 单位分钟
      * @return
      */
-    private Boolean isOtherDate(String date) {
+    private Boolean isOtherDate(String date, int updateTime) {
+		Log.v(TAG, "date: " + date );
     	if(date == null){
     		return true;
     	}
-
-    	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+    	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CANADA);
         try {
             Date dt1 = df.parse(date);
             Date today = new Date();
-
-			//超过16个小时更新
-            if (Math.abs(dt1.getTime() - today.getTime()) > 16*60*60*1000) {
+			Log.v(TAG, "dt1:" + dt1 + " today:" + today);
+			//超过updateTime分钟更新
+            if (Math.abs(dt1.getTime() - today.getTime()) > updateTime*60*1000) {
                 return true;
             } else {
                 return false;
@@ -410,32 +496,6 @@ public class WeatherActivity extends Activity implements OnClickListener{
     }
 
 
-    /**
-     *  处理http请求回来的数据
-     * @param weatherString
-     * @return
-     */
-    private Weather handleWeatherResponse(String weatherString) {
-    	Weather weather = new Weather();
-
-    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd ", Locale.CHINA);
-
-		try {
-			JSONObject jsonObject = new JSONObject(weatherString);
-			JSONObject jsonWeather = jsonObject.getJSONObject("weatherinfo");
-			weather.setMinTemp(jsonWeather.getString("temp2"));
-			weather.setMaxTemp(jsonWeather.getString("temp1"));
-			weather.setDesp(jsonWeather.getString("weather"));
-			weather.setTime(sdf.format(new Date()) + jsonWeather.getString("ptime"));
-			Log.i(TAG,"handleWeatherResponse" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
-					+ weather.getDesp() + weather.getTime());
-
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-
-		return weather;
-	}
 
 
 	@Override

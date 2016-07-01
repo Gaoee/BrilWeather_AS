@@ -8,7 +8,7 @@
     <color name="bg_sort_color">#EDEDED</color>
     <color name="blue">#0000FF</color><!--蓝色 -->
     <color name="mediumblue">#0000CD</color><!--中兰色 -->
-    <color name="darkblue">#00008B</color><!--暗蓝色 E73068FF-->
-    <color name="light_blue">#E73EA2FF</color>
+    <color name="darkblue">#00008B</color><!--暗蓝色 -->
+    <color name="light_blue">#FF0570D4</color>
     <color name="light_grey">#ffe6e6e6</color>
 </resources>

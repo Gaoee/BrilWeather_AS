@@ -25,10 +25,10 @@ public class DBHelper extends SQLiteOpenHelper {
 			+ "(id integer primary key autoincrement," 
 			+ "cityName text," 
 			+ "cityCode text not null unique,"
-			+ "temp1 text,"
-			+ "temp2 text,"
-			+ "weatherDesp text,"
-			+ "publishTime text)";
+			+ "observe text,"
+			+ "forecast text,"
+			+ "windex text,"
+			+ "updateTime text)";
 
 	private static final String ALTER_WEATHER_ADDORDERID = "ALTER TABLE " + WEATHER_TABLE_NAME
 			+ " ADD OrderId integer";
@@ -89,22 +89,24 @@ public class DBHelper extends SQLiteOpenHelper {
      */
 	public void createDataBase(int newVersion) throws IOException{
 		boolean dbExist = checkDataBase();
-		
+		SQLiteDatabase db;
+		final int version;
 		if(dbExist){
-			
+			db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null, SQLiteDatabase.OPEN_READWRITE);
+			version = db.getVersion();
 		}else {
 			//一定要在这里进行getReadableDatabase,不然copyDataBase会出错的
+			version = 0;
 			this.getReadableDatabase();
 			try {
 				copyDataBase();
 			} catch (Exception e) {
 				throw new Error("Error copying!");
 			}
+			db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null, SQLiteDatabase.OPEN_READWRITE);
 		}
-		SQLiteDatabase db = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null, SQLiteDatabase.OPEN_READWRITE);
 
 		//仿照了SQLiteOpenHelper中的数据库版本控制方法
-		final int version = db.getVersion();
 		Log.v(TAG, "createDataBase version: " + version);
 		if (version != newVersion) {
 			if (db.isReadOnly()) {

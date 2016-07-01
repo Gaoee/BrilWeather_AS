@@ -1,17 +1,12 @@
 package com.brilweather;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.brilweather.DB.WeatherDB;
 import com.brilweather.http.HttpCallbackListene;
 import com.brilweather.http.HttpUtil;
+import com.brilweather.http.JsonUtility;
 import com.brilweather.model.Weather;
 import com.brilweather.weathersetting.MySharedPreferences;
 
@@ -56,7 +51,7 @@ public class AutoUpdateService extends Service {
 		String updateFrequencyString = MySharedPreferences.getMySharePrefereces().readFreqTime();
 		int updateFrequency = Integer.valueOf(updateFrequencyString.substring(0,updateFrequencyString.length()-2));
 		Log.v(TAG, "updateFrequency:" + updateFrequency);
-		int anHour = 60*1000;			//设定后台更新时间为4h updateFrequency*
+		int anHour = updateFrequency*60*1000;			//设定后台更新时间为
 		long triggerAtTime = SystemClock.elapsedRealtime() + anHour;
 		Intent i = new Intent(this, AutoUpdateReceiver.class);
 		PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);
@@ -73,25 +68,22 @@ public class AutoUpdateService extends Service {
 	}
 
 	
-	 private void getOnHttpWeather(String cityCode, final int cityId) {
-	    	String address = "http://www.weather.com.cn/data/cityinfo/"
-					+ cityCode + ".html";
-			HttpUtil.sendHttpRequest(address, new HttpCallbackListene() {
+	 private void getOnHttpWeather(final String cityCode, final int cityId) {
+			HttpUtil.sendHttpRequest(cityCode, new HttpCallbackListene() {
 				
 				@Override
 				public void onFinish(String reportString) {
 					Weather weather = weathers.get(cityId);
-					Weather w = handleWeatherResponse(reportString);
-					weather.setDesp(w.getDesp());
-					weather.setMaxTemp(w.getMaxTemp());
-					weather.setMinTemp(w.getMinTemp());
-					weather.setTime(w.getTime());
-					weatherDB.updateWeather(weather.getCityCode(), weather.getMinTemp(),
-							weather.getMaxTemp(), weather.getDesp(), weather.getTime());
-					Log.i(TAG,"AutoUpdateService" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
-							+ weather.getDesp() + weather.getTime());
+					Weather w = JsonUtility.getJsonUtility(getApplication()).handleWeatherResponse(reportString, cityCode);
+					weather.setIndex(w.getIndex());
+					weather.setForecast(w.getForecast());
+					weather.setObserve(w.getObserve());
+					weather.setUpdateTime(w.getUpdateTime());
+					weatherDB.updateWeather(weather.getCityCode(), weather.getObserve(),
+							weather.getForecast(), weather.getIndex(), weather.getUpdateTime());
+					Log.i(TAG,"AutoUpdateService" + weather.getCityName() + weather.getCityCode() + weather.getObserve() + weather.getForecast()
+							+ weather.getIndex() + weather.getUpdateTime());
 					Log.v(TAG, "AutoUpdateService cityID:" + cityId);
-					
 				}
 				
 				@Override
@@ -99,29 +91,5 @@ public class AutoUpdateService extends Service {
 				}
 			});
 		}
-	 
-	 	/*
-	     * 处理http请求回来的数据
-	     * */
-	    private Weather handleWeatherResponse(String weatherString) {
-	    	Weather weather = new Weather();
-	    	
-	    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd ", Locale.CHINA);
-	    	
-			try {
-				JSONObject jsonObject = new JSONObject(weatherString);
-				JSONObject jsonWeather = jsonObject.getJSONObject("weatherinfo");
-				weather.setMinTemp(jsonWeather.getString("temp2"));
-				weather.setMaxTemp(jsonWeather.getString("temp1"));
-				weather.setDesp(jsonWeather.getString("weather"));
-				weather.setTime(sdf.format(new Date()) + jsonWeather.getString("ptime"));
-				Log.i(TAG,"AutoUpdateService" + weather.getCityName() + weather.getCityCode() + weather.getMinTemp() + weather.getMaxTemp()
-						+ weather.getDesp() + weather.getTime());
-				
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			
-			return weather;
-		}
+
 }

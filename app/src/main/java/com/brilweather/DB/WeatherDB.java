@@ -1,21 +1,19 @@
 package com.brilweather.DB;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.brilweather.model.City;
-import com.brilweather.model.Province;
-import com.brilweather.model.Weather;
-
-import android.R.id;
-import android.R.string;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+
+import com.brilweather.model.City;
+import com.brilweather.model.Province;
+import com.brilweather.model.Weather;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WeatherDB {
 	private final static String TAG = "lee";
@@ -207,20 +205,21 @@ public class WeatherDB {
 	}
 
 	/**
-	 *更新天气 
+	 *更新天气
+	 *
 	 * */
-	public int updateWeather(String cityCode, String temp1, String temp2, String weatherDesp, String publicTime){
+	public int updateWeather(String cityCode, String observe, String forecast, String index, String updateTime){
 		ContentValues values = new ContentValues();
-		values.put("temp1", temp1);
-		values.put("temp2", temp2);
-		values.put("weatherDesp", weatherDesp);
-		values.put("publishTime", publicTime);
+		values.put("observe", observe);
+		values.put("forecast", forecast);
+		values.put("windex", index);
+		values.put("updateTime", updateTime);
 		
 		return db.update(DBHelper.WEATHER_TABLE_NAME, values, "cityCode = ?", new String[]{cityCode});
 	}
 
 	/**
-	 * 获得weatherTable中的所有天气数据
+	 * 获得weatherTable中的所有天气数据   需要更改
 	 * @return
      */
 	public List<Weather> loadWeathers() {
@@ -231,11 +230,11 @@ public class WeatherDB {
 				Weather weather = new Weather();
 				weather.setCityCode(cursor.getString(cursor.getColumnIndex("cityCode")));
 				weather.setCityName(cursor.getString(cursor.getColumnIndex("cityName")));
-				weather.setDesp(cursor.getString(cursor.getColumnIndex("weatherDesp")));
+				weather.setIndex(cursor.getString(cursor.getColumnIndex("windex")));
 				weather.setId(cursor.getInt(cursor.getColumnIndex("id")));
-				weather.setMaxTemp(cursor.getString(cursor.getColumnIndex("temp2")));
-				weather.setMinTemp(cursor.getString(cursor.getColumnIndex("temp1")));
-				weather.setTime(cursor.getString(cursor.getColumnIndex("publishTime")));
+				weather.setForecast(cursor.getString(cursor.getColumnIndex("forecast")));
+				weather.setObserve(cursor.getString(cursor.getColumnIndex("observe")));
+				weather.setUpdateTime(cursor.getString(cursor.getColumnIndex("updateTime")));
 				weathers.add(weather);
 			}while(cursor.moveToNext());
 		}
@@ -253,11 +252,11 @@ public class WeatherDB {
 		if(cursor.moveToFirst()){
 			weather.setCityCode(cursor.getString(cursor.getColumnIndex("cityCode")));
 			weather.setCityName(cursor.getString(cursor.getColumnIndex("cityName")));
-			weather.setDesp(cursor.getString(cursor.getColumnIndex("weatherDesp")));
+			weather.setIndex(cursor.getString(cursor.getColumnIndex("windex")));
 			weather.setId(cursor.getInt(cursor.getColumnIndex("id")));
-			weather.setMaxTemp(cursor.getString(cursor.getColumnIndex("temp2")));
-			weather.setMinTemp(cursor.getString(cursor.getColumnIndex("temp1")));
-			weather.setTime(cursor.getString(cursor.getColumnIndex("publishTime")));
+			weather.setForecast(cursor.getString(cursor.getColumnIndex("forecast")));
+			weather.setObserve(cursor.getString(cursor.getColumnIndex("observe")));
+			weather.setUpdateTime(cursor.getString(cursor.getColumnIndex("updateTime")));
 		}
 		
 		if (cursor != null) {
